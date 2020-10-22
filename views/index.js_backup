@@ -1,0 +1,117 @@
+// var socket = io.connect('https://4676e84e.ngrok.io');
+var socket = io.connect('http://localhost:5001/');
+
+var userAuthId = "7c6de410-8e33-11ea-88ee-b46d830ab42d";
+socket.on('socket-connected', function (data) {
+    // console.log("Data got", data);
+    console.log("socket.id", socket.id)
+    socket.emit('connected', { user: userAuthId, id: socket.id })
+    // document.getElementById("greeting_message").innerHTML = data.greeting_message;
+})
+
+socket.on('add-users', function (data) {
+    console.log("User added", data);
+    for (var i = 0; i < data.users.length; i++) {
+        var el = document.createElement('div'),
+            id = data.users[i];
+
+        el.setAttribute('id', id);
+        el.setAttribute('class', "column");
+        // el.addEventListener('click', function () {
+        //     createOffer(id);
+        // });
+        var el1 = document.createElement("div");
+        el1.setAttribute('class', 'card');
+        el1.innerHTML = id;
+        console.log("el and el1", el, el1);
+        el.appendChild(el1);
+        console.log("element1", el);
+        document.getElementById('users').appendChild(el);
+    }
+});
+
+socket.on('remove-user', function (id) {
+    console.log("Socket id", id);
+    var div = document.getElementById(id);
+    console.log("div value", div);
+    div.style.opacity = "0.3";
+});
+
+socket.on('all-rooms', function (rooms) {
+    console.log("All available rooms", rooms);
+    // for (var i = 0; i < rooms.rooms.length; i++) {
+    //     var el = document.createElement('div'),
+    //         id = rooms.rooms[i];
+
+    //     el.setAttribute('id', id);
+    //     el.innerHTML = id;
+    //     el.addEventListener('click', function () {
+    //         createOffer(id);
+    //     });
+    //     document.getElementById('rooms').appendChild(el);
+    // }
+});
+
+socket.on('conversation-got', function (data) {
+    console.log("Data got is", data);
+    var messageWrapper = document.getElementsByClassName("message-wrap")[0];
+    content.querySelector(".info .time").innerHTML = "last seen...."
+    messageWrapper.innerHTML = '';
+    for (var i = 0; i < data.allConversations.length; i++) {
+        var notMeDiv = document.createElement("div");
+        notMeDiv.setAttribute("class","message-list");
+        // console.log("Div formed",notMeDiv)
+        var meDiv = document.createElement("div");
+        meDiv.setAttribute("class","message-list me");
+        var messageDiv = document.createElement("div");
+        messageDiv.setAttribute("class","msg");
+        var messagePara = document.createElement("p");
+        messagePara.innerHTML = data.allConversations[i].reply;
+        if(data.allConversations[i].user_id == userAuthId){
+            // console.log("Me messages");
+            messageDiv.appendChild(messagePara);
+            meDiv.appendChild(messageDiv);
+            messageWrapper.appendChild(meDiv);
+            console.log("Me div formed",meDiv);
+        }
+        else{
+            // console.log("Not me Messages");
+            messageDiv.appendChild(messagePara);
+            notMeDiv.appendChild(messageDiv);
+            messageWrapper.appendChild(notMeDiv);
+            console.log("Not me div formed",notMeDiv);
+        }
+    }
+})
+
+function allRooms() {
+    console.log("Get all rooms");
+    socket.emit('all-rooms', { id: socket.id });
+}
+
+function createRoom() {
+    var room = document.getElementById("new_room").value;
+    console.log("room name is", room, socket.id);
+
+    socket.emit('create-room', { room_name: room, id: socket.id });
+    var el = document.createElement('div'),
+        id = room;
+
+    el.setAttribute('id', id);
+    el.innerHTML = id;
+    document.getElementById('rooms').appendChild(el);
+}
+
+function joinRoom() {
+    var room = document.getElementById("room").value;
+    console.log("join room", room);
+
+    socket.emit('join-room', { room_name: room, id: socket.id });
+}
+
+function getConversation(userId) {
+    document.getElementsByClassName("message-wrap")[0].style.display = "none";
+    console.log("Inside getConversation", userId);
+    socket.emit('get-coversation', { user_id: userId, socket_id: socket.id });
+}
+

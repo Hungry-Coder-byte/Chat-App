@@ -1,0 +1,101 @@
+<html>
+
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/css/intlTelInput.css" rel="stylesheet"
+        media="screen">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/intlTelInput.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/intlTelInput.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.js"></script>
+    <link rel="stylesheet" href="./verify_phone.css">
+    <script>
+        angular.module('myApp', [])
+            .controller('myCtrl', ['$scope', '$timeout', '$http', '$interval', '$window', function ($scope, $timeout, $http, $interval, $window) {
+                $scope.checkAuth = function () {
+                    console.log("checkAuth", window.localStorage.getItem("phone"))
+                    if (window.localStorage.getItem("phone") != undefined && window.localStorage.getItem("phone") != null && window.localStorage.getItem("phone").length > 0) {
+                        window.location.href = "http://localhost:5001/otp_form.html"
+                    } else {
+                        window.localStorage.clear();
+                    }
+                }
+            }]);
+    </script>
+</head>
+
+<body ng-app="myApp" ng-controller="myCtrl" ng-init="checkAuth()">
+    <div class="formWrapper">
+        <div class="formWrapper-inside">
+            <div class="input-wrap">
+                <form method="POST" action="/validate_user">
+                    <input id="phone" type="tel" name="phone">
+                    <span id="valid-msg" class="hide">Valid</span>
+                    <span id="error-msg" class="hide">Invalid number</span>
+                    <button type="submit" onclick="savePhone()">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    function savePhone() {
+        window.localStorage.setItem("phone", document.getElementById("phone").value);
+        // alert(document.getElementById("phone").value);
+    }
+    var telInput = $("#phone"),
+        errorMsg = $("#error-msg"),
+        validMsg = $("#valid-msg");
+
+    // initialise plugin
+    telInput.intlTelInput({
+
+        allowExtensions: true,
+        formatOnDisplay: true,
+        autoFormat: true,
+        autoHideDialCode: true,
+        autoPlaceholder: true,
+        defaultCountry: "auto",
+        ipinfoToken: "yolo",
+
+        nationalMode: false,
+        numberType: "MOBILE",
+        //onlyCountries: ['us', 'gb', 'ch', 'ca', 'do'],
+        preferredCountries: ['sa', 'ae', 'qa', 'om', 'bh', 'kw', 'ma'],
+        preventInvalidNumbers: true,
+        separateDialCode: true,
+        initialCountry: "auto",
+        geoIpLookup: function (callback) {
+            // $.get("http://ipinfo.io", function () { }, "jsonp").always(function (resp) {
+            // var countryCode = (resp && resp.country) ? resp.country : "";
+            // console.log("country_code",countryCode)
+            callback("IN");
+            // });
+        },
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"
+    });
+
+    var reset = function () {
+        telInput.removeClass("error");
+        errorMsg.addClass("hide");
+        validMsg.addClass("hide");
+    };
+
+    // on blur: validate
+    telInput.blur(function () {
+        reset();
+        if ($.trim(telInput.val())) {
+            if (telInput.intlTelInput("isValidNumber")) {
+                validMsg.removeClass("hide");
+            } else {
+                telInput.addClass("error");
+                errorMsg.removeClass("hide");
+            }
+        }
+    });
+
+    // on keyup / change flag: reset
+    telInput.on("keyup change", reset);
+</script>
+
+</html>

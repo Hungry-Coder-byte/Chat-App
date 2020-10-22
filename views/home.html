@@ -1,0 +1,169 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+<link rel="stylesheet" href="./chat.css">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="./connection.js"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<!-- <link rel="stylesheet" href="./verify_phone.css"> -->
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/css/intlTelInput.css" rel="stylesheet"
+    media="screen">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/intlTelInput.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/intlTelInput.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"></script> -->
+<div class="notification_wrapper">
+    <div class="call_notification">
+        <audio id="calling_tune" style="display: none;" loop>
+            <source src="caller_tune.mp3" type="audio/mpeg">
+        </audio>
+        <p id="notification_content"></p>
+        <div class="call_notification_btns">
+            <i class="fa fa-phone" aria-hidden="true" style="margin-right: 20px;" id="reject_call"></i>
+            <i class="fa fa-phone" aria-hidden="true" style="margin-right: 20px;" id="accept_call"></i>
+        </div>
+    </div>
+</div>
+<div class="container" ng-app="myApp" ng-controller="myCtrl" ng-init="checkAuth()" onload="getConversationOnLoad()">
+    <sidebar>
+        <span class="logo">
+            <img src="{{user_pic}}" id="user_main" class="user_details" style="display: none;">
+            <!-- <i class='far fa-comment-alt compose_new_message'></i> -->
+            <i class="material-icons compose_new_message">chat</i>
+            <i class="material-icons more_opt">more_vert</i>
+        </span>
+        <div class="row composeBox1">
+            <div class="col-sm-12 composeBox-inner1">
+                <div class="form-group has-feedback">
+                    <input id="composeText1" type="text" class="form-control" name="searchText"
+                        placeholder="Search People">
+                    <span class="material-icons search_btn_new_chat">
+                        search
+                    </span>
+                    <!-- <span class="glyphicon glyphicon-search form-control-feedback"></span> -->
+                </div>
+            </div>
+        </div>
+        <div class="list-wrap">
+            <div ng-if="no_chat_found != null && no_chat_found != undefined"
+                style="text-align: center;margin-top:100px;opacity: 0.4;">{{no_chat_found}}</div>
+        </div>
+    </sidebar>
+    <sidebar class="user_details_side_bar">
+        <h1>User Details</h1>
+    </sidebar>
+    <sidebar class="new_chat">
+        <!-- <h1>New Chat</h1> -->
+        <!-- Heading -->
+        <div class="row newMessage-heading">
+            <div class="row newMessage-main">
+                <div class="col-sm-2 col-xs-2 newMessage-back">
+                    <i class="fa fa-arrow-left newMessage-back-arrow" aria-hidden="true" style="float: left;"></i>
+                    <div class="col-sm-10 col-xs-10 newMessage-title">
+                        New Chat
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Heading End -->
+
+        <!-- ComposeBox -->
+        <div class="row composeBox">
+            <div class="col-sm-12 composeBox-inner">
+                <div class="form-group has-feedback">
+                    <input id="composeText" type="text" class="form-control" name="searchText"
+                        placeholder="Search People">
+                    <span class="material-icons search_btn_new_chat">
+                        search
+                    </span>
+                    <!-- <span class="glyphicon glyphicon-search form-control-feedback"></span> -->
+                </div>
+            </div>
+        </div>
+        <!--modals-->
+        <div id="openModal-about" class="modalDialog">
+            <div>
+                <a href="#" title="Close" class="close">X</a>
+                <div class="modern-form">
+                    <h3>Contact Details</h3>
+                    <fieldset class='float-label-field'>
+                        <label for="contact-name">Name</label>
+                        <input type='text' id="contact-name">
+                    </fieldset>
+                    <fieldset class='float-label-field'>
+                        <label for="contact">Phone number</label>
+                        <input type="tel" name="phone" id="contact" maxlength="10">
+                    </fieldset>
+                    <button type="button" class="btn btn-success" onclick="createNewContact()">Save</button>
+                </div>
+            </div>
+        </div>
+        <div class="whatsapp_contacts">
+            <div class="contacts-inner">
+                <a href="#openModal-about" style="text-decoration: none;color: black;">
+                    <div class="add-new-contact">
+                        <span class="material-icons">
+                            person_add
+                        </span>
+                        <span style="margin-top: 5px;margin-left:15px;position: absolute;">Add Contact</span>
+                    </div>
+                </a>
+                <ul class="contact-list">
+                </ul>
+            </div>
+        </div>
+        <!-- ComposeBox End -->
+    </sidebar>
+    <!-- <div class="default_page">
+        <img src="opening_wallpaper.gif">
+    </div> -->
+    <div class="content">
+        <header style="display: none;">
+            <img src="" alt="">
+            <div class="info">
+                <span class="user"></span>
+                <span class="time"></span>
+            </div>
+            <div class="communication_channel">
+                <i class="fa fa-phone" aria-hidden="true" style="margin-right: 20px;"></i>
+                <i class="fa fa-video-camera" aria-hidden="true" onclick="videoCall()"></i>
+                <i class="material-icons">more_vert</i>
+            </div>
+            <div class="open">
+                <a href="javascript:;">UP</a>
+            </div>
+        </header>
+        <div class="message-wrap" style="display: none;">
+        </div>
+        <div class="message-footer" style="display: none;">
+            <input type="text" data-placeholder="Send a message to {0}" id="message_to_send" /><i
+                class="fa fa-paper-plane" aria-hidden="true" onclick="sendMessage()" id="send_message"></i>
+        </div>
+    </div>
+    <div class='center'>
+        <video autoplay loop id="myVideo">
+        </video>
+        <div class="fullscreen_button_wrapper">
+            <img src="fullscreen.png">
+        </div>
+        <div class="overlay">
+            <div class="video_actions video">
+                <img src="video_cam_off.png">
+                <img src="video_cam_on.png" style="display: none;">
+            </div>
+            <div id="phone_cut_wrapper" class="video_actions">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" id="phone_cut">
+                    <path
+                        d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                </svg>
+            </div>
+            <div class="video_actions audio">
+                <img src="mic_off.png">
+                <img src="mic_on.png" style="display: none;">
+            </div>
+        </div>
+    </div>
+</div>
+<script src="./chat.js"></script>
+<script src="/socket.js"></script>
+<script type="text/javascript" src="/index.js"></script>

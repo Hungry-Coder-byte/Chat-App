@@ -1,0 +1,105 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.js"></script>
+<script>
+    angular.module('myApp', [])
+        .controller('myCtrl', ['$scope', '$timeout', '$http', '$interval', '$window', function ($scope, $timeout, $http, $interval, $window) {
+            $scope.verifyOtp = function () {
+                console.log("$scope.otp", $scope.otp);
+                alert($scope.otp);
+                var phone = window.localStorage.getItem("phone");
+                $http.get('http://localhost:5001/verify_otp/' + phone + "/" + $scope.otp).then(function (response) {
+                    console.log("response", response.data);
+                    debugger;
+                    if (response.data.indexOf('.html') != -1)
+                        window.location.href = response.data;
+                    else if (response.data != "null") {
+                        window.localStorage.clear();
+                        window.localStorage.setItem("user", response.data);
+                        $scope.checkAuth();
+                    } else {
+                        $('.col-6').css({ "display": "none" });
+                        $('#newUserForm').css({ "display": "flex" });
+                    }
+                })
+            }
+            $scope.createNewUser = function () {
+                var data = {};
+                data.phone = window.localStorage.getItem("phone");
+                data.contact_name = $scope.user;
+                $http.post('http://localhost:5001/create_user', data).then(function (response) {
+                    console.log("response", response.data);
+                    debugger;
+                    window.localStorage.clear();
+                    window.localStorage.setItem("user", response.data);
+                    $scope.checkAuth();
+                })
+            }
+            $scope.checkAuth = function () {
+                if (window.localStorage.getItem("user") != undefined && window.localStorage.getItem("user") != null)
+                    window.location.href = "http://localhost:5001/home.html";
+                else if (window.localStorage.getItem("phone") != undefined && window.localStorage.getItem("phone") != null && window.localStorage.getItem("phone").length > 0)
+                    console.log("correct page");
+
+                else
+                    window.location.href = "http://localhost:5001/index.html"
+            }
+        }]);
+    $(function () {
+        document.getElementsByClassName("card-header")[0].innerHTML = "Enter OTP sent to " + window.localStorage.getItem("phone");
+
+        $("input.decimal").bind("change keyup input", function () {
+            var position = this.selectionStart - 1;
+            //remove all but number and .
+            var fixed = this.value.replace(/[^0-9\.]/g, "");
+            if (fixed.charAt(0) === ".")
+                //can't start with .
+                fixed = fixed.slice(1);
+
+            var pos = fixed.indexOf(".") + 1;
+            if (pos >= 0)
+                //avoid more than one .
+                fixed = fixed.substr(0, pos) + fixed.slice(pos).replace(".", "");
+
+            if (this.value !== fixed) {
+                this.value = fixed;
+                this.selectionStart = position;
+                this.selectionEnd = position;
+            }
+        });
+
+        $("input.integer").bind("change keyup input", function () {
+            var position = this.selectionStart - 1;
+            //remove all but number and .
+            var fixed = this.value.replace(/[^0-9]/g, "");
+
+            if (this.value !== fixed) {
+                this.value = fixed;
+                this.selectionStart = position;
+                this.selectionEnd = position;
+            }
+        });
+    });
+</script>
+
+<div class="row justify-content-md-center" ng-app="myApp" ng-controller="myCtrl" ng-init="checkAuth()">
+    <div id="newUserForm" style="display: none;">
+        <input type="text" placeholder="Your name..." ng-model="user">
+        <button type="button" ng-click="createNewUser()">Submit</button>
+    </div>
+    <div class="col-6">
+        <div class="card text-center">
+            <div class="card-header">
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="form-group">
+                        <input id="aninput" class="integer form-control" type="text" placeholder="OTP..." maxlength="6"
+                            ng-model="otp" />
+                        <button class="btn btn-success" ng-click="verifyOtp()">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
