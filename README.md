@@ -52,3 +52,4 @@ sudo apt show postgresql
 
 Go to https://www.guru99.com/download-install-postgresql.html and follow the steps as mentioned.
 
+<strong>Finally create required tables, ref - <a href='./schema_design'>Table Structure</a>
