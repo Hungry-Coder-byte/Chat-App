@@ -1,0 +1,53 @@
+CREATE TABLE otp_phone
+(
+  phone character varying(12) NOT NULL,
+  otp character varying(6) NOT NULL,
+  createdtm timestamp without time zone DEFAULT now(),
+  CONSTRAINT otp_phone_pkey PRIMARY KEY (phone)
+);
+
+CREATE TABLE user_details
+(
+  user_id text NOT NULL,
+  user_name character varying(50),
+  phone character varying(12) NOT NULL,
+  user_pic text DEFAULT 'https://soe.ukzn.ac.za/wp-content/uploads/2018/04/profile-placeholder.png'::text,
+  createdtm timestamp without time zone DEFAULT now(),
+  socket_id text DEFAULT 'NA'::text,
+  CONSTRAINT user_details_pkey PRIMARY KEY (user_id),
+  CONSTRAINT user_details_user_id_fkey FOREIGN KEY (user_id)
+      REFERENCES users (user_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+CREATE TABLE conversation
+(
+  c_id text NOT NULL DEFAULT uuid_generate_v1(),
+  user_one text NOT NULL,
+  user_two text NOT NULL,
+  "time" numeric DEFAULT date_part('epoch'::text, now()),
+  wallpaper text DEFAULT 'default_wall.jpeg'::text,
+  CONSTRAINT conversation_pkey PRIMARY KEY (c_id),
+  CONSTRAINT conversation_user_one_fkey FOREIGN KEY (user_one)
+      REFERENCES users (user_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT conversation_user_two_fkey FOREIGN KEY (user_two)
+      REFERENCES users (user_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+CREATE TABLE conversation_reply
+(
+  cr_id text NOT NULL DEFAULT uuid_generate_v1(),
+  reply text,
+  user_id text NOT NULL,
+  c_id text NOT NULL,
+  "time" numeric DEFAULT date_part('epoch'::text, now()),
+  CONSTRAINT conversation_reply_pkey PRIMARY KEY (cr_id),
+  CONSTRAINT conversation_reply_c_id_fkey FOREIGN KEY (c_id)
+      REFERENCES conversation (c_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT conversation_reply_user_id_fkey FOREIGN KEY (user_id)
+      REFERENCES users (user_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
