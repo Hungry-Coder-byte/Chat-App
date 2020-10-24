@@ -1,4 +1,4 @@
-<b>Chat-App</b> - Your Personal Chat Application.<br>
+<b>Chat-App</b> - Your Personal Chat Application.<br><br>
 Chat-App is a simple and secure chat application where you have messages stored on your own server. You can also customize according to your own requirement and add some more cool and interesting feature. To do so, just clone the repo and start coding.
 
 <b>Prerequisite</b>
@@ -7,6 +7,7 @@ Chat-App is a simple and secure chat application where you have messages stored 
 2. Postgresql - Database ,(or you can use your own database server as per interest and experience)<br><br>
 
 <b>Step 1 - Install Node.js</b><br>
+<hr>
 Ignore if already installed on the system
 
 <b>For Ubuntu Users -</b>
@@ -33,6 +34,7 @@ npm i nodemon -g<br>
 </i>
 
 <b>Step 2. Install Postgresql</b>
+<hr>
 Ignore if already installed on the system
 
 <b>For Ubuntu Users -</b>
