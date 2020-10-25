@@ -53,4 +53,12 @@ sudo apt show postgresql
 
 Go to https://www.guru99.com/download-install-postgresql.html and follow the steps as mentioned.
 
-<strong>Finally create required tables, ref - <a href='./schema_design'>Table Structure</a>
+<strong>Finally create required tables, ref - <a href='./schema_design'>Table Structure</a></strong><br>
+  
+ <b>Run app -</b><hr>
+ 
+ After following above steps successfully, run the below commands - <br><br>
+  npm i (install required packages)<br>
+  nodemon server.js (start server)<br>
+  
+  open - http://localhost:5001 on your browser.
