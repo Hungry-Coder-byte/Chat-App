@@ -1,25 +1,27 @@
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<link rel="stylesheet" href="./otp_form.css">
+<!------ Include the above in your HEAD tag ---------->
+
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.js"></script>
 <script>
     angular.module('myApp', [])
         .controller('myCtrl', ['$scope', '$timeout', '$http', '$interval', '$window', function ($scope, $timeout, $http, $interval, $window) {
             $scope.verifyOtp = function () {
                 console.log("$scope.otp", $scope.otp);
-                alert($scope.otp);
                 var phone = window.localStorage.getItem("phone");
                 $http.get('http://localhost:5001/verify_otp/' + phone + "/" + $scope.otp).then(function (response) {
                     console.log("response", response.data);
-                    debugger;
                     if (response.data.indexOf('.html') != -1)
                         window.location.href = response.data;
-                    else if (response.data != "null") {
+                    else if (response.data != null && response.data != "null") {
                         window.localStorage.clear();
                         window.localStorage.setItem("user", response.data);
                         $scope.checkAuth();
                     } else {
-                        $('.col-6').css({ "display": "none" });
                         $('#newUserForm').css({ "display": "flex" });
+                        $('#otp_enter').css({ "display": "none" });
                     }
                 })
             }
@@ -82,24 +84,30 @@
     });
 </script>
 
-<div class="row justify-content-md-center" ng-app="myApp" ng-controller="myCtrl" ng-init="checkAuth()">
+<div class="container" class="row justify-content-md-center" ng-app="myApp" ng-controller="myCtrl"
+    ng-init="checkAuth()">
     <div id="newUserForm" style="display: none;">
+        <p>Looks like you are not registered yet! No worries... just enter username and we are ready to go.</p><br><br><br>
         <input type="text" placeholder="Your name..." ng-model="user">
-        <button type="button" ng-click="createNewUser()">Submit</button>
+        <button class="btn btn-success" ng-click="createNewUser()">Submit</button>
     </div>
-    <div class="col-6">
-        <div class="card text-center">
-            <div class="card-header">
-            </div>
-            <div class="card-body">
-                <form>
-                    <div class="form-group">
-                        <input id="aninput" class="integer form-control" type="text" placeholder="OTP..." maxlength="6"
-                            ng-model="otp" />
-                        <button class="btn btn-success" ng-click="verifyOtp()">Submit</button>
+    <div class="row" id="otp_enter">
+        <div class="col-sm-6 col-sm-offset-2">
+            <!-- col -->
+            <h2>
+                <h1>Check your phone!</h1>
+            </h2>
+            <p class="desc">We’ve sent a six-digit confirmation code to <strong>9650743974</strong> &
+                Enter it below to confirm your mobile number.</p>
+            <br><br><br>
+            <label><span class="normal">Your </span>confirmation code</label>
+            <div class="confirmation_code split_input large_bottom_margin" data-multi-input-code="true">
+                <div class="confirmation_code_group">
+                    <div class="split_input_item input_wrapper"><input type="text" class="inline_input" maxlength="6" ng-model="otp">
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
+            <button class="btn btn-success" ng-click="verifyOtp()">Submit</button>
+        </div><!-- endof col -->
     </div>
 </div>

@@ -5,13 +5,6 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="./connection.js"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<!-- <link rel="stylesheet" href="./verify_phone.css"> -->
-<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/css/intlTelInput.css" rel="stylesheet"
-    media="screen">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/intlTelInput.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/intlTelInput.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/11.0.9/js/utils.js"></script> -->
 <div class="notification_wrapper">
     <div class="call_notification">
         <audio id="calling_tune" style="display: none;" loop>
@@ -30,7 +23,15 @@
             <img src="{{user_pic}}" id="user_main" class="user_details" style="display: none;">
             <!-- <i class='far fa-comment-alt compose_new_message'></i> -->
             <i class="material-icons compose_new_message">chat</i>
-            <i class="material-icons more_opt">more_vert</i>
+            <i class="material-icons more_opt" onclick="moreOption()">more_vert
+                <div id="more_vert_opts">
+                    <ul>
+                        <li>Profile</li>
+                        <li>Settings</li>
+                        <li onclick="logout()">Logout</li>
+                    </ul>
+                </div>
+            </i>
         </span>
         <div class="row composeBox1">
             <div class="col-sm-12 composeBox-inner1">

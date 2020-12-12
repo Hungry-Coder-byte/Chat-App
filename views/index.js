@@ -83,7 +83,7 @@ function openChatBox() {
 //list click
 function click(l, index) {
     if (l) {
-        console.log("l & index",l,index);
+        console.log("l & index", l, index);
         // $('.list').eq(index).addClass('active');
         // document.getElementsByClassName("list")[index].addClass = "active";
         // console.log(l, index);
@@ -457,3 +457,16 @@ socket.on('contact-created', (contact) => {
     document.getElementById('contact-name').value = null;
     document.getElementById('contact').value = null;
 })
+
+function moreOption() {
+    // console.log($('#more_vert_opts').css("display"))
+    if ($('#more_vert_opts').css("display") == "none")
+        $('#more_vert_opts').css({ "display": "block" });
+    else
+        $('#more_vert_opts').css({ "display": "none" });
+}
+
+function logout() {
+    localStorage.clear();
+    window.location.href = "/"
+}
