@@ -6,7 +6,7 @@ CREATE TABLE otp_phone
   CONSTRAINT otp_phone_pkey PRIMARY KEY (phone)
 );
 
-CREATE TABLE public.users
+CREATE TABLE users
 (
   user_id text NOT NULL DEFAULT uuid_generate_v1(),
   username character varying(25) NOT NULL,
