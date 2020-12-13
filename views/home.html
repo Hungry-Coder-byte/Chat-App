@@ -54,6 +54,13 @@
         <div class="list-wrap">
             <div ng-if="no_chat_found != null && no_chat_found != undefined"
                 style="text-align: center;margin-top:100px;opacity: 0.4;">{{no_chat_found}}</div>
+            <div id="chat_opts">
+                <ul>
+                    <li>Mute</li>
+                    <li>Archieve</li>
+                    <li onclick="deleteChat()">Delete</li>
+                </ul>
+            </div>
         </div>
     </sidebar>
     <sidebar class="user_details_side_bar">
@@ -89,7 +96,7 @@
         </div>
         <!--modals-->
         <div id="openModal-about" class="modalDialog">
-            <div>
+            <div id="fullmodal">
                 <a href="#" title="Close" class="close">X</a>
                 <div class="modern-form">
                     <h3>Contact Details</h3>

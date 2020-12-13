@@ -84,7 +84,11 @@ io.on('connection', (socket) => {
     socket.on('create-contact', (contact) => { 
         console.log("Inside create-contact",contact);
         route.createContact(contact,io);
-    })
+    });
+    socket.on('delete-chat', (chat) => { 
+        console.log("Inside delete-contact",chat);
+        route.deleteChat(chat,io);
+    });
     socket.on('disconnect', () => {
         console.log("User disconnected", socket.id)
         socketsArray.splice(socketsArray.indexOf(socket.id), 1);

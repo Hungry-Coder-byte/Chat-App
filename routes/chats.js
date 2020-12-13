@@ -358,3 +358,24 @@ function createNewUser(contact, callback) {
 }
 
 module.exports.createContact = createContact;
+
+const deleteChat = async(chat,io) =>{
+    console.log("I am in deleteChat",chat);
+    await chatDelete(chat);
+    // io.to(chat.socket_id).emit('chat-deleted', chat);
+    io.to(chat.socket_id).emit('chat-deleted', { chat });
+}
+
+chatDelete = (chat) =>{
+    return new Promise(resolve =>{
+        DB.query("delete from conversation_reply  where c_id  in(select c_id from conversation where (user_one = $1 and user_two = $2) or (user_one = $2 and user_two = $1))",[chat.user_id,chat.delete_chat_id])
+        .then((chat_deleted) =>{
+            console.log("chat deleted");
+        }).catch((error) => {
+            console.log("Error while deleting chat",error);
+            // resolve(-1)
+        })
+    })
+}
+
+module.exports.deleteChat = deleteChat;

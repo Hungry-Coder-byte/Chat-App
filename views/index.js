@@ -83,7 +83,7 @@ function openChatBox() {
 //list click
 function click(l, index) {
     if (l) {
-        console.log("l & index", l, index);
+        // console.log("l & index", l, index);
         // $('.list').eq(index).addClass('active');
         // document.getElementsByClassName("list")[index].addClass = "active";
         // console.log(l, index);
@@ -152,6 +152,7 @@ function getConversation(userId) {
 }
 
 function getConversationOnLoad() {
+    console.log("Inside getConversationOnLoad")
     // console.log('window.localStorage.getItem("user_selected")', window.localStorage.getItem("user_selected"));
     if (window.localStorage.getItem("user_selected") != undefined)
         socket.emit('get-conversation', { user_id: window.localStorage.getItem("user_selected"), socket_id: socket.id });
@@ -299,6 +300,10 @@ socket.on('answer-made', function (data) {
         }
     }, error);
 });
+
+function deleteChat() {
+    socket.emit('delete-chat', { user_id: window.localStorage.getItem("user"), socket_id: socket.id, delete_chat_id: window.localStorage.getItem("user_selected") })
+}
 
 function videoOff() {
     // alert($(this).index() + 1)
@@ -474,6 +479,7 @@ function logout() {
 function darkModeEnableDisable() {
     // console.log("darkModeEnableDisable",$('sidebar .logo').css("background-color"))
     if ($('sidebar .logo').css("background-color") != "rgb(38, 50, 56)") {
+        localStorage.setItem("dark_mode", "on");
         $('sidebar .logo').css({ "background": "#263238" })
         $('sidebar').css({ "background": "#37474F" })
         $('.new_chat').css({ "background": "#263238" })
@@ -504,7 +510,18 @@ function darkModeEnableDisable() {
         $('.contact-list li').css({ "border-bottom": "0.4px solid rgb(94, 93, 93)" })
         $('.add-new-contact').css({ "color": "#a9a9a9" })
         $('.contact-list li').css({ "color": "#a9a9a9" })
+        $('#chat_opts').css({ "background": "#37474F" })
+        $('#chat_opts').css({ "color": "#ffffff" })
+        $(".communication_channel .fa-phone").css({ "color": "#a9a9a9" })
+        $(".communication_channel .fa-video-camera").css({ "color": "#a9a9a9" })
+        $(".communication_channel .material-icons").css({ "color": "#a9a9a9" })
+        $(".fa-paper-plane").css({ "color": "#a9a9a9" })
+        $(".modern-form").css({ "background": "#37474F" })
+        $("#fullmodal").css({ "background": "#37474F" })
+        $('#fullmodal input').css({ "background": "#263238" })
+        $('#fullmodal input').css({ "color": "#ffffff" })
     } else {
+        localStorage.removeItem("dark_mode");
         $('sidebar .logo').css({ "background": "rgb(237, 237, 237)" })
         $('sidebar').css({ "background": "#fff" })
         $('.new_chat').css({ "background": "#ffffff" })
@@ -535,5 +552,28 @@ function darkModeEnableDisable() {
         $('.contact-list li').css({ "border-bottom": "0.3px solid rgb(241, 241, 241)" })
         $('.add-new-contact').css({ "color": "#000000" })
         $('.contact-list li').css({ "color": "rgb(74, 74, 74)" })
+        $('#chat_opts').css({ "background": "#ffffff" })
+        $('#chat_opts').css({ "color": "#000000" })
+        $(".communication_channel .fa-phone").css({ "color": "#000000" })
+        $(".communication_channel .fa-video-camera").css({ "color": "#000000" })
+        $(".communication_channel .material-icons").css({ "color": "#000000" })
+        $(".fa-paper-plane").css({ "color": "#000000" })
+        $(".modern-form").css({ "background": "#ffffff" })
+        $("#fullmodal").css({ "background": "#ffffff" })
+        $('#fullmodal input').css({ "background": "#ffffff" })
+        $('#fullmodal input').css({ "color": "#000000" })
     }
+}
+
+var current_chat_pos = -1;
+
+function chatMoreOpts(pos) {
+    console.log("position", pos)
+    console.log("top position", $('.list').eq(pos).position())
+    // $('.list').eq(pos).css({"display" : "none"})
+    if ($("#chat_opts").css("display") == "none" || current_chat_pos != pos)
+        $("#chat_opts").css({ "display": "block", "top": $('.list').eq(pos).position().top });
+    else
+        $("#chat_opts").css({ "display": "none" });
+    current_chat_pos = pos;
 }
