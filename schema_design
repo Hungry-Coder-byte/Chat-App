@@ -6,6 +6,16 @@ CREATE TABLE otp_phone
   CONSTRAINT otp_phone_pkey PRIMARY KEY (phone)
 );
 
+CREATE TABLE public.users
+(
+  user_id text NOT NULL DEFAULT uuid_generate_v1(),
+  username character varying(25) NOT NULL,
+  password character varying(50) NOT NULL,
+  email character varying(100) NOT NULL,
+  CONSTRAINT users_pkey PRIMARY KEY (user_id),
+  CONSTRAINT users_username_key UNIQUE (username)
+);
+
 CREATE TABLE user_details
 (
   user_id text NOT NULL,
