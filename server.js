@@ -30,16 +30,17 @@ app.post('/validate_user', (req, res) => {
 });
 
 app.get('/verify_otp/:phone/:otp', route.verifyOtp);
-app.post('/create_user',route.create_new_user);
+app.post('/create_user', route.create_new_user);
 
 app.get('/user_chats/:user_id', route.getChats);
 app.get('/chat_conversations/:user_id', route.getConversations);
 
 io.on('connection', (socket) => {
     io.to(socket.id).emit('socket-connected', { id: socket.id });
-    socket.on("connected", (user) => {
+    socket.on("connected", async (user) => {
         console.log("Connected", user);
-        route.updateUserSocketId(user);
+        await route.updateUserSocketId(user);
+        route.setOnlineStatus(user.id, "Online", io);
     });
     socket.on('get-conversation', (user) => {
         console.log("Conversation requested for user", user);
@@ -81,18 +82,18 @@ io.on('connection', (socket) => {
         console.log("Inside get-contacts", user_id);
         route.getUserContacts(user_id, io);
     });
-    socket.on('create-contact', (contact) => { 
-        console.log("Inside create-contact",contact);
-        route.createContact(contact,io);
+    socket.on('create-contact', (contact) => {
+        console.log("Inside create-contact", contact);
+        route.createContact(contact, io);
     });
-    socket.on('delete-chat', (chat) => { 
-        console.log("Inside delete-contact",chat);
-        route.deleteChat(chat,io);
+    socket.on('delete-chat', (chat) => {
+        console.log("Inside delete-contact", chat);
+        route.deleteChat(chat, io);
     });
     socket.on('disconnect', () => {
-        console.log("User disconnected", socket.id)
+        console.log("User disconnected", socket.id);
+        route.setOnlineStatus(socket.id, "Offline", io);
         socketsArray.splice(socketsArray.indexOf(socket.id), 1);
-        socket.to("room").emit('remove-user', socket.id);
+        // socket.to("room").emit('remove-user', socket.id);
     });
 });
-

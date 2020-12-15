@@ -242,6 +242,10 @@ sidebar .list-wrap .list .time {
     color: #a9a9a9;
 }
 
+.online_stat{
+    float: right;
+}
+
 sidebar .list-wrap .list .count {
     font-size: 0.75em;
     background: #bde2f7;

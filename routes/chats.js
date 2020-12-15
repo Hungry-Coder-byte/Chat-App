@@ -83,7 +83,7 @@ var getChats = function (req, res, next) {
     DB.query("select user_pic from user_details where user_id = $1", req.params.user_id)
         .then(function (user_pic) {
             finalData.user_pic = user_pic[0].user_pic;
-            DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,C.c_id,R.reply,R.time\
+            DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,U.online_status,C.c_id,R.reply,R.time\
         FROM user_details U,conversation C, conversation_reply R\
         WHERE \
         CASE\
@@ -98,6 +98,7 @@ var getChats = function (req, res, next) {
         (C.user_one =$1 OR C.user_two =$1) and reply != 'NA' ORDER BY phone,R.time DESC", req.params.user_id)
                 .then(function (userChats) {
                     finalData.chats = userChats;
+                    console.log("Final response from get user chats", finalData);
                     res.send(finalData);
                 }).catch(function (error) {
                     console.log("Error while getting user chats", error);
@@ -113,10 +114,44 @@ module.exports.getChats = getChats;
 
 var updateUserSocketId = function (user) {
     console.log("Inside updateUserSocketId", user);
-    DB.query("update user_details set socket_id = $1 where user_id = $2", [user.id, user.user]);
+    return new Promise(resolve => {
+        DB.query("update user_details set socket_id = $1,online_status='Online' where user_id = $2", [user.id, user.user])
+            .then((updated) => {
+                resolve(1);
+            })
+    })
 }
 
 module.exports.updateUserSocketId = updateUserSocketId;
+
+var setOnlineStatus = (socket_id, stat, io) => {
+    DB.query("update user_details set online_status = $2 where socket_id = $1", [socket_id, stat])
+        .then((updated) => {
+            DB.query("select user_id from user_details where socket_id = $1", socket_id)
+                .then((sender_id) => {
+                    sendOfflineStatusToOtherUsers(socket_id, stat, sender_id[0].user_id, io);
+                })
+        })
+}
+
+sendOfflineStatusToOtherUsers = (socket_id, online_status, user_id, io) => {
+    console.log("Inside sendOfflineStatusToOtherUsers", socket_id);
+    // if(online_status == "Offline")
+    //     online_status = Date.now();
+    DB.query("select socket_id,user_id,online_status from user_details where user_id in((select user_one from conversation where user_two in(select user_id from user_details where socket_id = $1) union all (select user_two from conversation where user_one in(select user_id from user_details where socket_id = $1))))", socket_id)
+        .then((socket_ids) => {
+            console.log("Total socket ids", socket_ids);
+            socket_ids.map((id) => {
+                console.log("id is", id);
+                io.to(id.socket_id).emit('user-offline', { user_id: user_id, status: online_status });
+                console.log("Emitted");
+            })
+        }).catch((error) => {
+            console.log("Error while fetching socket ids", error);
+        })
+}
+
+module.exports.setOnlineStatus = setOnlineStatus;
 
 var getConversations = function (user, socket, io) {
     console.log("Inside getConversations", user.user_id, user.page_num);
@@ -125,10 +160,16 @@ var getConversations = function (user, socket, io) {
     DB.query("select CR.user_id,CR.time,CR.reply,U.user_pic,C.wallpaper from conversation_reply CR,conversation C,user_details U where CR.c_id = C.c_id and U.user_id = CR.user_id and ((user_one = $1 or  user_two = $1) and (user_one = $4 or  user_two = $4)) order by time desc limit $2 offset $3", [user.user_id, limit, offset, user.user])
         .then(function (allConversations) {
             console.log("All conversationss", allConversations);
-            var data = {};
-            data.allConversations = allConversations;
-            data.page_num = user.page_num + 1;
-            io.to(socket.id).emit('conversation-got', { data });
+            DB.query("select online_status from user_details where user_id = $1", user.user_id)
+                .then((online_stat) => {
+                    var data = {};
+                    data.allConversations = allConversations;
+                    data.online_status = online_stat[0].online_status;
+                    data.page_num = user.page_num + 1;
+                    io.to(socket.id).emit('conversation-got', { data });
+                }).catch(function (error) {
+                    console.log("Error while getting user online_status", error);
+                })
         }).catch(function (error) {
             console.log("Error while getting user chats", error);
         })
@@ -359,22 +400,22 @@ function createNewUser(contact, callback) {
 
 module.exports.createContact = createContact;
 
-const deleteChat = async(chat,io) =>{
-    console.log("I am in deleteChat",chat);
+const deleteChat = async (chat, io) => {
+    console.log("I am in deleteChat", chat);
     await chatDelete(chat);
     // io.to(chat.socket_id).emit('chat-deleted', chat);
     io.to(chat.socket_id).emit('chat-deleted', { chat });
 }
 
-chatDelete = (chat) =>{
-    return new Promise(resolve =>{
-        DB.query("delete from conversation_reply  where c_id  in(select c_id from conversation where (user_one = $1 and user_two = $2) or (user_one = $2 and user_two = $1))",[chat.user_id,chat.delete_chat_id])
-        .then((chat_deleted) =>{
-            console.log("chat deleted");
-        }).catch((error) => {
-            console.log("Error while deleting chat",error);
-            // resolve(-1)
-        })
+chatDelete = (chat) => {
+    return new Promise(resolve => {
+        DB.query("delete from conversation_reply  where c_id  in(select c_id from conversation where (user_one = $1 and user_two = $2) or (user_one = $2 and user_two = $1))", [chat.user_id, chat.delete_chat_id])
+            .then((chat_deleted) => {
+                console.log("chat deleted");
+            }).catch((error) => {
+                console.log("Error while deleting chat", error);
+                // resolve(-1)
+            })
     })
 }
 

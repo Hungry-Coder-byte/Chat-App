@@ -43,6 +43,9 @@ angular.module('myApp', [])
                     var span3 = document.createElement("span");
                     span3.setAttribute("class", "time");
                     span3.innerHTML = chats[i].time;
+                    var online_stat = document.createElement("span");
+                    online_stat.setAttribute("class", "online_stat");
+                    online_stat.innerHTML = chats[i].online_status;
                     var expand = document.createElement("span");
                     expand.setAttribute("class", "material-icons expand-more");
                     expand.setAttribute("onClick", "chatMoreOpts(" + i + ")")
@@ -50,6 +53,8 @@ angular.module('myApp', [])
                     div2.appendChild(span1);
                     div2.appendChild(span2);
                     div1.appendChild(div2);
+                    span3.appendChild(document.createElement("br"));
+                    span3.appendChild(online_stat);
                     div1.appendChild(span3);
                     div1.appendChild(expand);
                     var wrapper = document.getElementsByClassName("list-wrap")[0];

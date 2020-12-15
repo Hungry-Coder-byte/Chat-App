@@ -1,13 +1,22 @@
 // var socket = io.connect('http://c2156187c19d.ngrok.io');
 var socket = io.connect('http://localhost:5001/');
 
-// var userAuthId = "7c6de410-8e33-11ea-88ee-b46d830ab42d";
 var userAuthId = window.localStorage.getItem("user");
 var page_num = 0;
 
 socket.on('socket-connected', function (data) {
-    // console.log("socket.id", socket.id)
     socket.emit('connected', { user: userAuthId, id: socket.id })
+})
+
+socket.on('user-offline', (user) => {
+    console.log("User is offline", user);
+    console.log("Div found",$("div#" + user.user_id));
+    console.log('$("div#"+user.user_id+" .online_stat")',$("div#"+user.user_id+" span .online_stat").html());
+    if(user.status == "Online"){
+        $("div#"+user.user_id+" span .online_stat").html(user.status);
+    }else{
+        $("div#"+user.user_id+" span .online_stat").html(user.status);
+    }
 })
 
 var allChats = [];
@@ -15,22 +24,17 @@ socket.on('conversation-got', function (data) {
     data = data.data;
     console.log("Data got is", data);
     var messageWrapper = document.getElementsByClassName("message-wrap")[0];
-    // var messageFooter = document.getElementsByClassName("message-footer")[0];
-    content.querySelector(".info .time").innerHTML = "last seen...."
+    content.querySelector(".info .time").innerHTML = data.online_status;
     if (data.allConversations.length > 0) {
         openChatBox();
-        // messageWrapper.style.display = "flex";
-        // messageFooter.style.display = "flex";
-        // $('.content header').html();
-        // $('.new_chat').animate({ "left": "-100%" }, "fast");
         $('.content').css({ 'background': "url('" + data.allConversations[0].wallpaper + "')", "background-repeat": "no-repeat", "background-size": "cover", "background-position": "center" })
         allChats = [...allChats, ...data.allConversations];
         messageWrapper.innerHTML = '';
         page_num = data.page_num;
+        c = 0;
         for (var i = allChats.length - 1; i >= 0; i--) {
             var notMeDiv = document.createElement("div");
             notMeDiv.setAttribute("class", "message-list speech-bubble");
-            // console.log("Div formed",notMeDiv)
             var meDiv = document.createElement("div");
             meDiv.setAttribute("class", "message-list me speech-bubble-me");
             var messageDiv = document.createElement("div");
@@ -39,7 +43,6 @@ socket.on('conversation-got', function (data) {
             messagePara.innerHTML = allChats[i].reply;
             if (allChats[i].length != 1 && allChats[i].reply != 'NA') {
                 if (allChats[i].user_id == userAuthId) {
-                    // console.log("Me messages");
                     var userPicMe = document.createElement("img");
                     userPicMe.setAttribute("class", "user_pic_chat_me")
                     userPicMe.setAttribute("src", allChats[i].user_pic)
@@ -47,10 +50,8 @@ socket.on('conversation-got', function (data) {
                     messageDiv.appendChild(messagePara);
                     meDiv.appendChild(messageDiv);
                     messageWrapper.appendChild(meDiv);
-                    // console.log("Me div formed", meDiv);
                 }
                 else {
-                    // console.log("Not me Messages");
                     var userPicNotMe = document.createElement("img");
                     userPicNotMe.setAttribute("class", "user_pic_chat_not_me")
                     userPicNotMe.setAttribute("src", allChats[i].user_pic)
@@ -58,7 +59,6 @@ socket.on('conversation-got', function (data) {
                     messageDiv.appendChild(messagePara);
                     notMeDiv.appendChild(messageDiv);
                     messageWrapper.appendChild(notMeDiv);
-                    // console.log("Not me div formed", notMeDiv);
                 }
             }
         }
@@ -73,7 +73,6 @@ function openChatBox() {
     $('.new_chat').animate({ "left": "-100%" }, "fast");
     var list = document.querySelectorAll(".list");
     list.forEach((l, i) => {
-        // console.log("l & i ",l,i);
         l.addEventListener("click", function () {
             click(l, i);
         });
@@ -83,10 +82,6 @@ function openChatBox() {
 //list click
 function click(l, index) {
     if (l) {
-        // console.log("l & index", l, index);
-        // $('.list').eq(index).addClass('active');
-        // document.getElementsByClassName("list")[index].addClass = "active";
-        // console.log(l, index);
         document.querySelector("sidebar").classList.remove("opened");
         open.innerText = "UP";
         const img = l.querySelector("img").src,
@@ -94,22 +89,16 @@ function click(l, index) {
             time = l.querySelector(".time").innerText;
         content.querySelector("img").src = img;
         content.querySelector(".info .user").innerHTML = user;
-        // content.querySelector(".info .time").innerHTML = time;
 
         const inputPH = input.getAttribute("data-placeholder");
         input.placeholder = inputPH.replace("{0}", user.split(' ')[0]);
-
-        // document.querySelector(".message-wrap").scrollTop = document.querySelector(".message-wrap").scrollHeight;
-        // localStorage.setItem("selected", index);
     }
 }
 
 socket.on("new-message", function (message) {
-    // console.log("New Message got", message);
     var messageWrapper = document.getElementsByClassName("message-wrap")[0];
     var notMeDiv = document.createElement("div");
     notMeDiv.setAttribute("class", "message-list speech-bubble");
-    // console.log("Div formed",notMeDiv)
     var meDiv = document.createElement("div");
     meDiv.setAttribute("class", "message-list me speech-bubble-me");
     var messageDiv = document.createElement("div");
@@ -117,7 +106,6 @@ socket.on("new-message", function (message) {
     var messagePara = document.createElement("p");
     messagePara.innerHTML = message.message;
     if (message.sender == userAuthId) {
-        // console.log("mine pic", message.sender_pic)
         var userPicMe = document.createElement("img");
         userPicMe.setAttribute("class", "user_pic_chat_me")
         userPicMe.setAttribute("src", message.sender_pic)
@@ -125,10 +113,8 @@ socket.on("new-message", function (message) {
         messageDiv.appendChild(messagePara);
         meDiv.appendChild(messageDiv);
         messageWrapper.appendChild(meDiv);
-        // console.log("Me div formed", meDiv);
     }
     else {
-        // console.log("not me", message.sender_pic);
         var userPicNotMe = document.createElement("img");
         userPicNotMe.setAttribute("class", "user_pic_chat_not_me")
         userPicNotMe.setAttribute("src", message.sender_pic)
@@ -136,16 +122,13 @@ socket.on("new-message", function (message) {
         messageDiv.appendChild(messagePara);
         notMeDiv.appendChild(messageDiv);
         messageWrapper.appendChild(notMeDiv);
-        // console.log("Not me div formed", notMeDiv);
     }
 })
 
 function getConversation(userId) {
-    // console.log("getConversation", userId);
     allChats = [];
     page_num = 0;
     $('.message-wrap').animate({ scrollTop: $(document).height() + 10000 * page_num }, 100);
-    // if (window.localStorage.getItem("user_selected") == undefined)
     window.localStorage.setItem("user_selected", userId);
     document.getElementsByClassName("message-wrap")[0].style.display = "none";
     socket.emit('get-conversation', { user_id: userId, socket_id: socket.id, page_num: page_num, user: window.localStorage.getItem("user") });
@@ -153,7 +136,6 @@ function getConversation(userId) {
 
 function getConversationOnLoad() {
     console.log("Inside getConversationOnLoad")
-    // console.log('window.localStorage.getItem("user_selected")', window.localStorage.getItem("user_selected"));
     if (window.localStorage.getItem("user_selected") != undefined)
         socket.emit('get-conversation', { user_id: window.localStorage.getItem("user_selected"), socket_id: socket.id });
 }
@@ -162,7 +144,6 @@ function sendMessage() {
     var message = document.getElementById("message_to_send").value;
     if (message.trim().length > 0) {
         document.getElementById("message_to_send").value = null;
-        // console.log("send message to", window.localStorage.getItem("user_selected"), message, window.localStorage.getItem("user"));
         socket.emit('send-message', { sender: window.localStorage.getItem("user"), receiver: window.localStorage.getItem("user_selected"), socket_id: socket.id, message: message });
         $('.message-wrap').animate({ scrollTop: $(document).height() + 10000 * page_num }, 300);
     }
@@ -208,14 +189,12 @@ function videoCall() {
     }
 
     navigator.getUserMedia({ video: true, audio: false }, function (stream) {
-        // var video = document.querySelector('video');
         var video = document.getElementById("myVideo");
         $('.content').css({ 'filter': "blur(20px)" })
         $('sidebar').css({ 'filter': "blur(20px)" })
         $("#myVideo").css({ "display": "flex" })
         $('#myVideo').css({ 'filter': "blur(0px)" })
         $('.center').css({ 'display': 'block' });
-        // console.log("video", video)
         video.srcObject = stream;
         pc.addStream(stream);
         if (currentCall == null)
@@ -233,7 +212,6 @@ function error(err) {
 
 socket.on('join-room', (room) => {
     room = room.data;
-    // console.log("Room join request", room);
     if (userAuthId == room.sender) {
         room.user_id = userAuthId;
         socket.emit('connect-room', { room });
@@ -293,7 +271,6 @@ socket.on('offer-made', function (data) {
 socket.on('answer-made', function (data) {
     console.log("Answer made", data);
     pc.setRemoteDescription(new sessionDescription(data.answer), function () {
-        // document.getElementById(data.socket).setAttribute('class', 'active');
         if (!answersFrom[data.socket]) {
             createOffer(data.socket);
             answersFrom[data.socket] = true;
@@ -316,7 +293,6 @@ function videoOff() {
 
 $('#message_to_send').keypress(function (e) {
     var key = e.which;
-    // console.log("key", e.which)
     if (key == 13)  // the enter key code
     {
         $('#send_message').trigger('click');
@@ -326,15 +302,12 @@ $('#message_to_send').keypress(function (e) {
 
 $('.message-wrap').scroll(function () {
     var pos = $('.message-wrap').scrollTop();
-    // console.log("pos",pos)
     if (pos <= 20) {
-        // alert('top of the div');
         socket.emit('get-conversation', { user_id: window.localStorage.getItem("user_selected"), socket_id: socket.id, page_num: page_num });
     }
 });
 
 $('.video img').on('click', function () {
-    // alert($(this).index())
     $(this).css({ "display": "none" });
     if ($(this).index() == 0)
         $('.video img').eq(1).css({ "display": "block" });
@@ -343,7 +316,6 @@ $('.video img').on('click', function () {
 })
 
 $('.audio img').on('click', function () {
-    // alert($(this).index())
     $(this).css({ "display": "none" });
     if ($(this).index() == 0)
         $('.audio img').eq(1).css({ "display": "block" });
@@ -375,7 +347,6 @@ $(".compose_new_message").click(function () {
 });
 
 socket.on('all-contacts', (contacts) => {
-    // console.log("contacts got", contacts);
     var contactListWrapper = document.getElementsByClassName("contact-list")[0];
     contactListWrapper.innerHTML = '';
     for (var i = 0; i < contacts.length; i++) {
@@ -394,18 +365,6 @@ socket.on('all-contacts', (contacts) => {
         li.appendChild(div);
         contactListWrapper.appendChild(li);
     }
-    // <li>
-    //     <img src="http://www.top-madagascar.com/assets/images/admin/user-admin.png" class="avatar">
-    //         <p>user one</p>
-    //                 </li>
-    //     <li>
-    //         <img src="http://www.top-madagascar.com/assets/images/admin/user-admin.png" class="avatar">
-    //             <p>user two</p>
-    //                 </li>
-    //         <li>
-    //             <img src="http://www.top-madagascar.com/assets/images/admin/user-admin.png" class="avatar">
-    //                 <p>user three</p>
-    //                 </li>
 })
 
 $(".user_details").click(function () {
@@ -430,7 +389,6 @@ $('input').blur(function () {
 });
 
 function createNewContact() {
-    // console.log(document.getElementById('contact-name'), document.getElementById('contact'))
     var contactName = document.getElementById('contact-name').value;
     var contact = document.getElementById('contact').value;
     var data = {};
@@ -442,7 +400,7 @@ function createNewContact() {
 }
 
 socket.on('contact-created', (contact) => {
-    // console.log("New contact created", contact);
+    console.log("New contact created", contact);
     var contactListWrapper = document.getElementsByClassName("contact-list")[0];
     var li = document.createElement("li");
     var img = document.createElement("img");
@@ -464,7 +422,6 @@ socket.on('contact-created', (contact) => {
 })
 
 function moreOption() {
-    // console.log($('#more_vert_opts').css("display"))
     if ($('#more_vert_opts').css("display") == "none")
         $('#more_vert_opts').css({ "display": "block" });
     else
@@ -477,7 +434,6 @@ function logout() {
 }
 
 function darkModeEnableDisable() {
-    // console.log("darkModeEnableDisable",$('sidebar .logo').css("background-color"))
     if ($('sidebar .logo').css("background-color") != "rgb(38, 50, 56)") {
         localStorage.setItem("dark_mode", "on");
         $('sidebar .logo').css({ "background": "#263238" })
@@ -570,7 +526,6 @@ var current_chat_pos = -1;
 function chatMoreOpts(pos) {
     console.log("position", pos)
     console.log("top position", $('.list').eq(pos).position())
-    // $('.list').eq(pos).css({"display" : "none"})
     if ($("#chat_opts").css("display") == "none" || current_chat_pos != pos)
         $("#chat_opts").css({ "display": "block", "top": $('.list').eq(pos).position().top });
     else
