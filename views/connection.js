@@ -155,6 +155,7 @@ angular.module('myApp', [])
                 $("#fullmodal").css({ "background": "#37474F" })
                 $('#fullmodal input').css({ "background": "#263238" })
                 $('#fullmodal input').css({ "color": "#ffffff" })
+                $("#typing_status").css({ "color": "#ffffff" });
             }
         }
     }]);

@@ -10,12 +10,12 @@ socket.on('socket-connected', function (data) {
 
 socket.on('user-offline', (user) => {
     console.log("User is offline", user);
-    console.log("Div found",$("div#" + user.user_id));
-    console.log('$("div#"+user.user_id+" .online_stat")',$("div#"+user.user_id+" span .online_stat").html());
-    if(user.status == "Online"){
-        $("div#"+user.user_id+" span .online_stat").html(user.status);
-    }else{
-        $("div#"+user.user_id+" span .online_stat").html(user.status);
+    console.log("Div found", $("div#" + user.user_id));
+    console.log('$("div#"+user.user_id+" .online_stat")', $("div#" + user.user_id + " span .online_stat").html());
+    if (user.status == "Online") {
+        $("div#" + user.user_id + " span .online_stat").html(user.status);
+    } else {
+        $("div#" + user.user_id + " span .online_stat").html(user.status);
     }
 })
 
@@ -149,29 +149,29 @@ function sendMessage() {
     }
 }
 
-var answersFrom = {}, offer;
-var peerConnection = window.RTCPeerConnection ||
-    window.mozRTCPeerConnection ||
-    window.webkitRTCPeerConnection ||
-    window.msRTCPeerConnection;
+// var answersFrom = {}, offer;
+// var peerConnection = window.RTCPeerConnection ||
+//     window.mozRTCPeerConnection ||
+//     window.webkitRTCPeerConnection ||
+//     window.msRTCPeerConnection;
 
-var sessionDescription = window.RTCSessionDescription ||
-    window.mozRTCSessionDescription ||
-    window.webkitRTCSessionDescription ||
-    window.msRTCSessionDescription;
+// var sessionDescription = window.RTCSessionDescription ||
+//     window.mozRTCSessionDescription ||
+//     window.webkitRTCSessionDescription ||
+//     window.msRTCSessionDescription;
 
-navigator.getUserMedia = navigator.getUserMedia ||
-    navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia ||
-    navigator.msGetUserMedia;
+// navigator.getUserMedia = navigator.getUserMedia ||
+//     navigator.webkitGetUserMedia ||
+//     navigator.mozGetUserMedia ||
+//     navigator.msGetUserMedia;
 
-var pc = new peerConnection({
-    iceServers: [{
-        url: "stun:stun.services.mozilla.com",
-        username: "somename",
-        credential: "somecredentials"
-    }]
-});
+// var pc = new peerConnection({
+//     iceServers: [{
+//         url: "stun:stun.services.mozilla.com",
+//         username: "somename",
+//         credential: "somecredentials"
+//     }]
+// });
 
 function videoCall() {
     navigator.getUserMedia = navigator.getUserMedia ||
@@ -206,6 +206,51 @@ function videoCall() {
     }
 }
 
+function videoCall_v2() {
+    socket.emit("create-meet", { user_id: userAuthId, socket_id: socket.id, receiver: window.localStorage.getItem("user_selected") });
+}
+
+socket.on("video-call", (data) => {
+    console.log("Video call url for sender", data);
+    startVideoCall(data);
+})
+
+socket.on("join-video-call", (data) => {
+    console.log("Video call receiving", data);
+    showNotification({ sender_name: "Yashu" }, data);
+});
+
+startVideoCall = (data) => {
+    navigator.getUserMedia = navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia;
+
+    if (navigator.getUserMedia) {
+        navigator.getUserMedia({ audio: true, video: true },
+            function (stream) {
+                $('.center').css({ 'display': 'block' });
+                $('.content').css({ 'filter': "blur(20px)" })
+                $('sidebar').css({ 'filter': "blur(20px)" })
+                $('#videoCallScreen').attr('src', data.url);
+            },
+            function (err) {
+                console.log("The following error occurred: " + err.name);
+            }
+        );
+    } else {
+        console.log("getUserMedia not supported");
+    }
+}
+
+$('#accept_call').on('click', function () {
+    $('.notification_wrapper').css({ "display": "none" });
+    startVideoCall(currentCall);
+})
+
+socket.on("video-call-error", (data) => {
+    console.log("Video call receiving error");
+})
+
 function error(err) {
     console.warn('Error', err);
 }
@@ -222,8 +267,8 @@ socket.on('join-room', (room) => {
 
 var currentCall = null;
 
-function showNotification(room) {
-    currentCall = room;
+function showNotification(room, data) {
+    currentCall = { ...room, ...data };
     var calling_tune = document.getElementById("calling_tune");
     calling_tune.play();
     $('.notification_wrapper').css({ "display": "flex" });
@@ -233,12 +278,6 @@ function showNotification(room) {
 function pauseAudio() {
     x.pause();
 }
-
-$('#accept_call').on('click', function () {
-    createOffer(currentCall.room_name);
-    $('.notification_wrapper').css({ "display": "none" });
-    videoCall();
-})
 
 function createOffer(room_name) {
     console.log("Inside createOffer");
@@ -290,6 +329,30 @@ function videoOff() {
     // else if($(this).index() == 1)
     //     $('.video_actions img').eq($(this).index()).css({"display":"block"});
 }
+
+var timeout;
+
+function timeoutFunction() {
+    socket.emit("typing", { user_id: userAuthId, receiver: window.localStorage.getItem("user_selected"), typing: false });
+}
+
+document.addEventListener('keyup', function () {
+    console.log("Key typing in process");
+    socket.emit('typing', { user_id: userAuthId, receiver: window.localStorage.getItem("user_selected"), typing: true });
+    clearTimeout(timeout)
+    timeout = setTimeout(timeoutFunction, 2000)
+})
+
+socket.on('typing', function (data) {
+    console.log("User is typing",data);
+    if (data.typing) {
+        $("#typing_status").html("typing...");
+        // $("div#" + data.user_id + " span .online_stat").html($("div#" + data.user_id + " span .online_stat").html()+" typing...");
+    } else {
+        $("#typing_status").html("");
+        // $("div#" + data.user_id + " span .online_stat").html($("div#" + data.user_id + " span .online_stat").html().replace(" typing..."));
+    }
+});
 
 $('#message_to_send').keypress(function (e) {
     var key = e.which;
@@ -475,7 +538,8 @@ function darkModeEnableDisable() {
         $(".modern-form").css({ "background": "#37474F" })
         $("#fullmodal").css({ "background": "#37474F" })
         $('#fullmodal input').css({ "background": "#263238" })
-        $('#fullmodal input').css({ "color": "#ffffff" })
+        $('#fullmodal input').css({ "color": "#ffffff" });
+        $("#typing_status").css({ "color": "#ffffff" });
     } else {
         localStorage.removeItem("dark_mode");
         $('sidebar .logo').css({ "background": "rgb(237, 237, 237)" })
@@ -517,7 +581,8 @@ function darkModeEnableDisable() {
         $(".modern-form").css({ "background": "#ffffff" })
         $("#fullmodal").css({ "background": "#ffffff" })
         $('#fullmodal input').css({ "background": "#ffffff" })
-        $('#fullmodal input').css({ "color": "#000000" })
+        $('#fullmodal input').css({ "color": "#000000" });
+        $("#typing_status").css({ "color": "#000000" });
     }
 }
 

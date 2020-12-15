@@ -1044,3 +1044,9 @@ input:checked+.slider:before {
     background: #a9a9a9;
     color: #000000;
 }
+
+#typing_status{
+    color: #000000;
+    width: 100%;
+    text-align: center;
+}

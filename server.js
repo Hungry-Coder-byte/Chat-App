@@ -90,6 +90,13 @@ io.on('connection', (socket) => {
         console.log("Inside delete-contact", chat);
         route.deleteChat(chat, io);
     });
+    socket.on('create-meet', (user) => {
+        route.createMeet(user, io);
+    });
+    socket.on('typing', (data) => {
+        // console.log("Typing is",data);
+        route.sendTypingStatus(data,io);
+    });
     socket.on('disconnect', () => {
         console.log("User disconnected", socket.id);
         route.setOnlineStatus(socket.id, "Offline", io);

@@ -1,5 +1,6 @@
-var DB = require('../DB').DB;
-var TOTP = require('onceler').TOTP;
+const DB = require('../DB').DB;
+const TOTP = require('onceler').TOTP;
+const cuid = require('cuid');
 
 var validateUser = function (phone, res) {
     console.log("validate number", phone);
@@ -420,3 +421,27 @@ chatDelete = (chat) => {
 }
 
 module.exports.deleteChat = deleteChat;
+
+const createMeet = (user, io) => {
+    console.log("Inside createMeet", user);
+    DB.query("select socket_id from user_details where user_id = $1", user.receiver)
+        .then((receiver_socket) => {
+            const url = "https://localhost:8080/" + user.receiver + cuid();
+            io.to(receiver_socket[0].socket_id).emit('join-video-call', { url: url });
+            io.to(user.socket_id).emit('video-call', { url: url });
+        }).catch((error) => {
+            console.log("Error while getting socket user id", error);
+            io.to(user.user_id).emit('video-call-error', {});
+        })
+}
+
+module.exports.createMeet = createMeet;
+
+const sendTypingStatus = (data, io) => {
+    console.log("Inside sendTypingStatus", data);
+    getReceiverSocketId(data.receiver, function (receiver_socket) {
+        io.to(receiver_socket).emit("typing", { typing: data.typing, user_id: data.user_id });
+    })
+}
+
+module.exports.sendTypingStatus = sendTypingStatus;
