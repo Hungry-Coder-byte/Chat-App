@@ -79,6 +79,20 @@ function openChatBox() {
     });
 }
 
+function closeChatBox() {
+    $('header').css({ "display": "none" });
+    $('.message-wrap').css({ "display": "none" });
+    $('.message-footer').css({ "display": "none" });
+    $('.list').removeClass('active');
+    $('.new_chat').animate({ "left": "-100%" }, "fast");
+    var list = document.querySelectorAll(".list");
+    list.forEach((l, i) => {
+        l.addEventListener("click", function () {
+            click(l, i);
+        });
+    });
+}
+
 //list click
 function click(l, index) {
     if (l) {
@@ -126,6 +140,7 @@ socket.on("new-message", function (message) {
 })
 
 function getConversation(userId) {
+    // closeChatBox();
     allChats = [];
     page_num = 0;
     $('.message-wrap').animate({ scrollTop: $(document).height() + 10000 * page_num }, 100);
@@ -344,7 +359,7 @@ document.addEventListener('keyup', function () {
 })
 
 socket.on('typing', function (data) {
-    console.log("User is typing",data);
+    console.log("User is typing", data);
     if (data.typing) {
         $("#typing_status").html("typing...");
         // $("div#" + data.user_id + " span .online_stat").html($("div#" + data.user_id + " span .online_stat").html()+" typing...");
@@ -436,6 +451,7 @@ $(".user_details").click(function () {
 
 $(".newMessage-back-arrow").click(function () {
     $('.new_chat').animate({ "left": "-100%" }, "fast");
+    $('.user_profile').animate({ "left": "-100%" }, "fast");
 });
 
 $('head').append('<link href="//fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet" type="text/css">');
@@ -597,3 +613,50 @@ function chatMoreOpts(pos) {
         $("#chat_opts").css({ "display": "none" });
     current_chat_pos = pos;
 }
+
+$(".profile_click").click(function () {
+    $('.user_profile').animate({ "left": "0%" }, "very fast");
+    console.log('$("#user_main").getAttribute("src")', $("#user_main").attr("src"))
+    $('.user_pic_large').attr("src", $("#user_main").attr("src"))
+});
+
+$("#user_main").click(function () {
+    $('.user_profile').animate({ "left": "0%" }, "very fast");
+    console.log('$("#user_main").getAttribute("src")', $("#user_main").attr("src"))
+    $('.user_pic_large').attr("src", $("#user_main").attr("src"))
+});
+
+$('.user_pic_large').click(function () {
+    $('#uploadfile').click();
+});
+
+$('#uploadfile').change(async () => {
+    var pics = $('#uploadfile').prop('files');
+    console.log("Files selected", pics[0]);
+    const base64 = await convertToBase(pics[0]);
+    uploadProfileImage(base64);
+});
+
+convertToBase = (image_data) => {
+    return new Promise(resolve => {
+        if (image_data) {
+            var FR = new FileReader();
+            FR.addEventListener("load", function (e) {
+                // console.log("Base64 is", e.target.result);
+                resolve(e.target.result);
+            });
+            FR.readAsDataURL(image_data);
+        }
+    })
+}
+
+uploadProfileImage = (base_image) => {
+    console.log("Base64 is", base_image);
+    socket.emit("update-profile-pic", { user: userAuthId, id: socket.id, image_data: base_image });
+}
+
+socket.on("profile-pic-uploaded", (data) => {
+
+})
+
+

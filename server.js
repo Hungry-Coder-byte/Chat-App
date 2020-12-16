@@ -94,8 +94,10 @@ io.on('connection', (socket) => {
         route.createMeet(user, io);
     });
     socket.on('typing', (data) => {
-        // console.log("Typing is",data);
-        route.sendTypingStatus(data,io);
+        route.sendTypingStatus(data, io);
+    });
+    socket.on('update-profile-pic', (data) => {
+        route.updateProfilePic(data, io);
     });
     socket.on('disconnect', () => {
         console.log("User disconnected", socket.id);

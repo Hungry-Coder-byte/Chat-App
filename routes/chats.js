@@ -1,6 +1,7 @@
 const DB = require('../DB').DB;
 const TOTP = require('onceler').TOTP;
 const cuid = require('cuid');
+const _ = require('underscore');
 
 var validateUser = function (phone, res) {
     console.log("validate number", phone);
@@ -84,7 +85,20 @@ var getChats = function (req, res, next) {
     DB.query("select user_pic from user_details where user_id = $1", req.params.user_id)
         .then(function (user_pic) {
             finalData.user_pic = user_pic[0].user_pic;
-            DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,U.online_status,C.c_id,R.reply,R.time\
+            //     DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,U.online_status,C.c_id,R.reply,R.time\
+            // FROM user_details U,conversation C, conversation_reply R\
+            // WHERE \
+            // CASE\
+            // WHEN C.user_one = $1\
+            // THEN C.user_two = U.user_id\
+            // WHEN C.user_two = $1\
+            // THEN C.user_one= U.user_id\
+            // END\
+            // AND\
+            // C.c_id=R.c_id\
+            // AND\
+            // (C.user_one =$1 OR C.user_two =$1) and reply != 'NA' ORDER BY phone,R.time DESC", req.params.user_id)
+            DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,U.online_status,C.c_id,R.reply,now()::date - to_timestamp(R.time)::date as direct,to_timestamp(R.time)::date as time\
         FROM user_details U,conversation C, conversation_reply R\
         WHERE \
         CASE\
@@ -99,6 +113,8 @@ var getChats = function (req, res, next) {
         (C.user_one =$1 OR C.user_two =$1) and reply != 'NA' ORDER BY phone,R.time DESC", req.params.user_id)
                 .then(function (userChats) {
                     finalData.chats = userChats;
+                    //userChats.slice().sort((a, b) => b.time - a.time);
+                    // _.sortBy(userChats, 'time');
                     console.log("Final response from get user chats", finalData);
                     res.send(finalData);
                 }).catch(function (error) {
@@ -445,3 +461,15 @@ const sendTypingStatus = (data, io) => {
 }
 
 module.exports.sendTypingStatus = sendTypingStatus;
+
+const updateProfilePic = (data, io) => {
+    console.log("Inside updateProfilePic");
+    DB.query("update user_details set user_pic = $1 where user_id = $2 and socket_id = $3",[data.image_data,data.user,data.id])
+    .then((updated) =>{
+        console.log("User pic updated");
+    }).catch((error) => {
+        console.log("Error while updating user pic",error);
+    });
+}
+
+module.exports.updateProfilePic = updateProfilePic;

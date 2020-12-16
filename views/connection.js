@@ -42,6 +42,15 @@ angular.module('myApp', [])
                     span2.innerHTML = chats[i].reply;
                     var span3 = document.createElement("span");
                     span3.setAttribute("class", "time");
+                    var event = new Date(chats[i].time);
+                    if (Number(chats[i].direct) == 0) {
+                        chats[i].time = event.toLocaleTimeString(navigator.language, { hour: '2-digit', minute: '2-digit' });
+                    } else if (Number(chats[i].direct) > 0 && Number(chats[i].direct) <= 7) {
+                        // console.log(chats[i].time)
+                        var options = { weekday: 'long' };
+                        chats[i].time = event.toLocaleDateString('en-US', options);
+                    } else {
+                    }
                     span3.innerHTML = chats[i].time;
                     var online_stat = document.createElement("span");
                     online_stat.setAttribute("class", "online_stat");
