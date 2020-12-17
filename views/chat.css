@@ -930,7 +930,7 @@ sidebar .list-wrap .list .count {
     top: 30px;
     right: 10px;
     background: #ffffff;
-    width: 300%;
+    width: 310%;
     min-height: 150px;
     max-height: auto;
     box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.5);
@@ -954,13 +954,25 @@ sidebar .list-wrap .list .count {
     background: #a9a9a9;
     color: #000000;
 }
-
+/* 
 .switch {
-    position: relative;
+    position: absolute;
     display: block;
     width: 40px;
     height: 20px;
     float: right;
+    margin-top: -20px;
+    margin-right: -4px;
+} */
+
+
+.switch {
+    position: absolute;
+    display: block;
+    width: 40px;
+    height: 20px;
+    right: 5px;
+    top:68px;
 }
 
 .switch input {
