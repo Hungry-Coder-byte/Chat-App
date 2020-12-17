@@ -174,7 +174,7 @@ var getConversations = function (user, socket, io) {
     console.log("Inside getConversations", user.user_id, user.page_num);
     var limit = 20;
     var offset = limit * ((user.page_num + 1) - 1)
-    DB.query("select CR.user_id,CR.time,CR.reply,U.user_pic,C.wallpaper from conversation_reply CR,conversation C,user_details U where CR.c_id = C.c_id and U.user_id = CR.user_id and ((user_one = $1 or  user_two = $1) and (user_one = $4 or  user_two = $4)) order by time desc limit $2 offset $3", [user.user_id, limit, offset, user.user])
+    DB.query("select CR.user_id,CR.time,CR.reply,C.wallpaper from conversation_reply CR,conversation C,user_details U where CR.c_id = C.c_id and U.user_id = CR.user_id and ((user_one = $1 or  user_two = $1) and (user_one = $4 or  user_two = $4)) order by time desc limit $2 offset $3", [user.user_id, limit, offset, user.user])
         .then(function (allConversations) {
             console.log("All conversationss", allConversations);
             DB.query("select online_status from user_details where user_id = $1", user.user_id)

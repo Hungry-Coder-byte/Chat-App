@@ -53,8 +53,13 @@ angular.module('myApp', [])
                     }
                     span3.innerHTML = chats[i].time;
                     var online_stat = document.createElement("span");
-                    online_stat.setAttribute("class", "online_stat");
-                    online_stat.innerHTML = chats[i].online_status;
+                    if (chats[i].online_status == "Online") {
+                        online_stat.setAttribute("class", "online_stat online");
+                        online_stat.innerHTML = chats[i].online_status;
+                    } else {
+                        online_stat.setAttribute("class", "online_stat offline");
+                        online_stat.innerHTML = chats[i].online_status;
+                    }
                     var expand = document.createElement("span");
                     expand.setAttribute("class", "material-icons expand-more");
                     expand.setAttribute("onClick", "chatMoreOpts(" + i + ")")

@@ -14,8 +14,10 @@ socket.on('user-offline', (user) => {
     console.log('$("div#"+user.user_id+" .online_stat")', $("div#" + user.user_id + " span .online_stat").html());
     if (user.status == "Online") {
         $("div#" + user.user_id + " span .online_stat").html(user.status);
+        $("div#" + user.user_id + " span .online_stat").css({ "color": "greenyellow" });
     } else {
         $("div#" + user.user_id + " span .online_stat").html(user.status);
+        $("div#" + user.user_id + " span .online_stat").css({ "color": "red" });
     }
 })
 
@@ -25,6 +27,11 @@ socket.on('conversation-got', function (data) {
     console.log("Data got is", data);
     var messageWrapper = document.getElementsByClassName("message-wrap")[0];
     content.querySelector(".info .time").innerHTML = data.online_status;
+    if (data.online_status == "Online") {
+        $(".info .time").css({ "color": "greenyellow" });
+    } else {
+        $(".info .time").css({ "color": "red" });
+    }
     if (data.allConversations.length > 0) {
         openChatBox();
         $('.content').css({ 'background': "url('" + data.allConversations[0].wallpaper + "')", "background-repeat": "no-repeat", "background-size": "cover", "background-position": "center" })
@@ -45,16 +52,19 @@ socket.on('conversation-got', function (data) {
                 if (allChats[i].user_id == userAuthId) {
                     var userPicMe = document.createElement("img");
                     userPicMe.setAttribute("class", "user_pic_chat_me")
-                    userPicMe.setAttribute("src", allChats[i].user_pic)
+                    userPicMe.setAttribute("src", $("#user_main").attr("src"));
                     meDiv.appendChild(userPicMe);
                     messageDiv.appendChild(messagePara);
                     meDiv.appendChild(messageDiv);
                     messageWrapper.appendChild(meDiv);
                 }
                 else {
+                    // console.log("user_id",allChats[i].user_id)
+                    // console.log($("div#"+allChats[i].user_id+" img").attr("src"));
                     var userPicNotMe = document.createElement("img");
                     userPicNotMe.setAttribute("class", "user_pic_chat_not_me")
-                    userPicNotMe.setAttribute("src", allChats[i].user_pic)
+                    // userPicNotMe.setAttribute("src", allChats[i].user_pic)
+                    userPicNotMe.setAttribute("src", $("div#" + allChats[i].user_id + " img").attr("src"))
                     notMeDiv.appendChild(userPicNotMe);
                     messageDiv.appendChild(messagePara);
                     notMeDiv.appendChild(messageDiv);
@@ -258,7 +268,7 @@ startVideoCall = (data) => {
         } else {
             console.log("getUserMedia not supported");
         }
-    },3000);
+    }, 3000);
 }
 
 $('#accept_call').on('click', function () {
@@ -654,9 +664,22 @@ convertToBase = (image_data) => {
     })
 }
 
-uploadProfileImage = (base_image) => {
+uploadProfileImage = async (base_image) => {
+    // const compressed_str = await compressImg(base_image);
     console.log("Base64 is", base_image);
     socket.emit("update-profile-pic", { user: userAuthId, id: socket.id, image_data: base_image });
+}
+
+compressImg = (img) => {
+    return new Promise(resolve => {
+        alert("Size of sample is: " + img.length);
+        var compressed = LZString.compress(img);
+        alert("Size of compressed sample is: " + compressed.length);
+        resolve(compressed);
+        img = LZString.decompress(compressed);
+        alert("Sample is: " + img);
+    });
+
 }
 
 socket.on("profile-pic-uploaded", (data) => {

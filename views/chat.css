@@ -1172,3 +1172,11 @@ input:checked+.slider:before {
         height: 32px;
     }
 }
+
+.online {
+    color: greenyellow;
+}
+
+.offline {
+    color: red;
+}
