@@ -46,6 +46,8 @@ CREATE TABLE conversation
       ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 
+create type msgTyp as enum ('text','image','video','file');
+
 CREATE TABLE conversation_reply
 (
   cr_id text NOT NULL DEFAULT uuid_generate_v1(),
@@ -53,6 +55,7 @@ CREATE TABLE conversation_reply
   user_id text NOT NULL,
   c_id text NOT NULL,
   "time" numeric DEFAULT date_part('epoch'::text, now()),
+  message_type msgTyp default 'text',
   CONSTRAINT conversation_reply_pkey PRIMARY KEY (cr_id),
   CONSTRAINT conversation_reply_c_id_fkey FOREIGN KEY (c_id)
       REFERENCES conversation (c_id) MATCH SIMPLE
