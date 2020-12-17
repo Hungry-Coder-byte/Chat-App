@@ -9,10 +9,16 @@ angular.module('myApp', [])
         // $scope.user_pic = "https://soe.ukzn.ac.za/wp-content/uploads/2018/04/profile-placeholder.png";
         $scope.getAllChats = function () {
             $scope.no_chat_found = null;
+            // document.getElementsByClassName("list-wrap")[0]
+            $(".list-wrap").empty();
             // console.log("Inside getAllChats");
             // $http.get('https://4676e84e.ngrok.io/user_chats/' + "7c6de410-8e33-11ea-88ee-b46d830ab42d").then(function (response) {
             var user_id = window.localStorage.getItem("user");
-            $http.get('http://localhost:5001/user_chats/' + user_id).then(function (response) {
+            if ($scope.chat_search == undefined || $scope.chat_search == null || $scope.chat_search.length == 0)
+                chat_search = "null";
+            else
+                chat_search = $scope.chat_search;
+            $http.get('http://localhost:5001/user_chats/' + user_id + '/' + chat_search).then(function (response) {
                 console.log("response", response.data);
                 $scope.allChats = response.data.chats;
                 $scope.user_pic = response.data.user_pic;
@@ -39,11 +45,13 @@ angular.module('myApp', [])
                     span1.innerHTML = chats[i].user_name;
                     var span2 = document.createElement("span");
                     span2.innerHTML = chats[i].reply;
-                    if(chats[i].message_type != 'text'){
-                        span2 = document.createElement("img");
-                        span2.setAttribute("src",chats[i].reply);
-                    }
                     span2.setAttribute("class", "text");
+                    if (chats[i].message_type != 'text') {
+                        span2 = document.createElement("i");
+                        span2.setAttribute("class", "fa fa-image")
+                        // span2.setAttribute("src",chats[i].reply);
+                        // <i class="fas fa-image"></i>
+                    }
                     var span3 = document.createElement("span");
                     span3.setAttribute("class", "time");
                     var event = new Date(chats[i].time);
@@ -176,5 +184,13 @@ angular.module('myApp', [])
                 $('#fullmodal input').css({ "color": "#ffffff" })
                 $("#typing_status").css({ "color": "#ffffff" });
             }
+        }
+
+        $scope.searchChat = () => {
+            console.log("Inside searchChat", $scope.chat_search);
+            if ($scope.chat_search != null && $scope.chat_search.trim().length >= 2)
+                $scope.getAllChats();
+            else
+                $scope.getAllChats(null);
         }
     }]);

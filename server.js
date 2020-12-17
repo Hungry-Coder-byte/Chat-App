@@ -32,7 +32,7 @@ app.post('/validate_user', (req, res) => {
 app.get('/verify_otp/:phone/:otp', route.verifyOtp);
 app.post('/create_user', route.create_new_user);
 
-app.get('/user_chats/:user_id', route.getChats);
+app.get('/user_chats/:user_id/:search_str', route.getChats);
 app.get('/chat_conversations/:user_id', route.getConversations);
 
 io.on('connection', (socket) => {

@@ -80,37 +80,29 @@ var create_new_user = function (req, res, next) {
 module.exports.create_new_user = create_new_user;
 
 var getChats = function (req, res, next) {
-    console.log("Inside getChats", req.params.user_id);
+    console.log("Inside getChats", req.params.user_id, req.params.search_str);
+    let qr_str = "";
+    if (req.params.search_str != "null" && req.params.search_str != null && req.params.search_str != undefined && req.params.search_str.trim().length > 2)
+        qr_str += " and U.user_name ilike '%" + req.params.search_str + "%'";
+
+    console.log("qr_str", qr_str)
     var finalData = {};
     DB.query("select user_pic from user_details where user_id = $1", req.params.user_id)
         .then(function (user_pic) {
             finalData.user_pic = user_pic[0].user_pic;
-            //     DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,U.online_status,C.c_id,R.reply,R.time\
-            // FROM user_details U,conversation C, conversation_reply R\
-            // WHERE \
-            // CASE\
-            // WHEN C.user_one = $1\
-            // THEN C.user_two = U.user_id\
-            // WHEN C.user_two = $1\
-            // THEN C.user_one= U.user_id\
-            // END\
-            // AND\
-            // C.c_id=R.c_id\
-            // AND\
-            // (C.user_one =$1 OR C.user_two =$1) and reply != 'NA' ORDER BY phone,R.time DESC", req.params.user_id)
             DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,U.online_status,C.c_id,R.reply,now()::date - to_timestamp(R.time)::date as direct,to_timestamp(R.time)::date as time,R.message_type\
-        FROM user_details U,conversation C, conversation_reply R\
-        WHERE \
-        CASE\
-        WHEN C.user_one = $1\
-        THEN C.user_two = U.user_id\
-        WHEN C.user_two = $1\
-        THEN C.user_one= U.user_id\
-        END\
-        AND\
-        C.c_id=R.c_id\
-        AND\
-        (C.user_one =$1 OR C.user_two =$1) and reply != 'NA' ORDER BY phone,R.time DESC", req.params.user_id)
+            FROM user_details U,conversation C, conversation_reply R\
+            WHERE \
+            CASE\
+            WHEN C.user_one = $1\
+            THEN C.user_two = U.user_id\
+            WHEN C.user_two = $1\
+            THEN C.user_one= U.user_id\
+            END\
+            AND\
+            C.c_id=R.c_id\
+            AND\
+            (C.user_one =$1 OR C.user_two =$1) and reply != 'NA' "+ qr_str + " ORDER BY phone,R.time DESC", req.params.user_id)
                 .then(function (userChats) {
                     finalData.chats = userChats;
                     //userChats.slice().sort((a, b) => b.time - a.time);
