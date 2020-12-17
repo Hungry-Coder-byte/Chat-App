@@ -236,25 +236,29 @@ socket.on("join-video-call", (data) => {
 });
 
 startVideoCall = (data) => {
-    navigator.getUserMedia = navigator.getUserMedia ||
-        navigator.webkitGetUserMedia ||
-        navigator.mozGetUserMedia;
+    $('.center').css({ 'display': 'block' });
+    $('.content').css({ 'filter': "blur(20px)" })
+    $('sidebar').css({ 'filter': "blur(20px)" })
+    $('#id01').css({ 'display': "block", 'filter': "blur(0px)", 'z-index': "99999" })
+    setTimeout(() => {
+        navigator.getUserMedia = navigator.getUserMedia ||
+            navigator.webkitGetUserMedia ||
+            navigator.mozGetUserMedia;
 
-    if (navigator.getUserMedia) {
-        navigator.getUserMedia({ audio: true, video: true },
-            function (stream) {
-                $('.center').css({ 'display': 'block' });
-                $('.content').css({ 'filter': "blur(20px)" })
-                $('sidebar').css({ 'filter': "blur(20px)" })
-                $('#videoCallScreen').attr('src', data.url);
-            },
-            function (err) {
-                console.log("The following error occurred: " + err.name);
-            }
-        );
-    } else {
-        console.log("getUserMedia not supported");
-    }
+        if (navigator.getUserMedia) {
+            navigator.getUserMedia({ audio: true, video: true },
+                function (stream) {
+                    $('#videoCallScreen').attr('src', data.url);
+                    // document.getElementById('id01').style.display='block';
+                },
+                function (err) {
+                    console.log("The following error occurred: " + err.name);
+                }
+            );
+        } else {
+            console.log("getUserMedia not supported");
+        }
+    },3000);
 }
 
 $('#accept_call').on('click', function () {

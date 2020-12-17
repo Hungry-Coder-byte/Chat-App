@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="./connection.js"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <div class="notification_wrapper">
     <div class="call_notification">
         <audio id="calling_tune" style="display: none;" loop>
@@ -141,7 +142,7 @@
             </div>
         </div>
         <div id="user_profile_pic">
-            <img src="" class="user_pic_large cropcircle"> 
+            <img src="" class="user_pic_large cropcircle">
             <div class="overlay">
                 <div class="change_pic_txt">Change Photo</div>
             </div>
@@ -174,6 +175,15 @@
         <div class="message-footer" style="display: none;">
             <input type="text" data-placeholder="Send a message to {0}" id="message_to_send" /><i
                 class="fa fa-paper-plane" aria-hidden="true" onclick="sendMessage()" id="send_message"></i>
+        </div>
+    </div>
+    <div id="id01" class="w3-modal">
+        <div class="w3-modal-content w3-animate-zoom w3-card-4">
+            <div class="w3-container" style="height: 200px;">
+                <div class="lds-facebook"><div></div><div></div><div></div></div><br>
+                <p style="text-align: center;">Kindly Refresh The Page When Video Call Ends</p>
+                <div class="lds-facebook" style="float: right;"><div></div><div></div><div></div></div>
+            </div>
         </div>
     </div>
     <div class='center'>
