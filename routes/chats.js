@@ -98,7 +98,7 @@ var getChats = function (req, res, next) {
             // C.c_id=R.c_id\
             // AND\
             // (C.user_one =$1 OR C.user_two =$1) and reply != 'NA' ORDER BY phone,R.time DESC", req.params.user_id)
-            DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,U.online_status,C.c_id,R.reply,now()::date - to_timestamp(R.time)::date as direct,to_timestamp(R.time)::date as time\
+            DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,U.online_status,C.c_id,R.reply,now()::date - to_timestamp(R.time)::date as direct,to_timestamp(R.time)::date as time,R.message_type\
         FROM user_details U,conversation C, conversation_reply R\
         WHERE \
         CASE\
@@ -115,7 +115,7 @@ var getChats = function (req, res, next) {
                     finalData.chats = userChats;
                     //userChats.slice().sort((a, b) => b.time - a.time);
                     // _.sortBy(userChats, 'time');
-                    console.log("Final response from get user chats", finalData);
+                    // console.log("Final response from get user chats", finalData);
                     res.send(finalData);
                 }).catch(function (error) {
                     console.log("Error while getting user chats", error);
@@ -174,9 +174,9 @@ var getConversations = function (user, socket, io) {
     console.log("Inside getConversations", user.user_id, user.page_num);
     var limit = 20;
     var offset = limit * ((user.page_num + 1) - 1)
-    DB.query("select CR.user_id,CR.time,CR.reply,C.wallpaper from conversation_reply CR,conversation C,user_details U where CR.c_id = C.c_id and U.user_id = CR.user_id and ((user_one = $1 or  user_two = $1) and (user_one = $4 or  user_two = $4)) order by time desc limit $2 offset $3", [user.user_id, limit, offset, user.user])
+    DB.query("select CR.user_id,CR.time,CR.reply,C.wallpaper,CR.message_type from conversation_reply CR,conversation C,user_details U where CR.c_id = C.c_id and U.user_id = CR.user_id and ((user_one = $1 or  user_two = $1) and (user_one = $4 or  user_two = $4)) order by time desc limit $2 offset $3", [user.user_id, limit, offset, user.user])
         .then(function (allConversations) {
-            console.log("All conversationss", allConversations);
+            // console.log("All conversationss", allConversations);
             DB.query("select online_status from user_details where user_id = $1", user.user_id)
                 .then((online_stat) => {
                     var data = {};
@@ -261,13 +261,15 @@ function createNewConversation(message, callback) {
 
 function saveConversationReply(cid, message, callback) {
     console.log("Inside saveConversationReply", cid);
-    DB.query("insert into conversation_reply  values(default,$1,$2,$3)", [message.message, message.sender, cid])
+    if (message.type == undefined || message.type == null)
+        message.type = "text"
+    DB.query("insert into conversation_reply values(default,$1,$2,$3,default,$4)", [message.message, message.sender, cid, message.type])
         .then(function (reply_saved) {
             callback(1);
         }).catch(function (error) {
             console.log("Error while saving reply", error);
             callback(null);
-        })
+        });
 }
 
 function getReceiverSocketId(user_id, callback) {
@@ -464,12 +466,42 @@ module.exports.sendTypingStatus = sendTypingStatus;
 
 const updateProfilePic = (data, io) => {
     console.log("Inside updateProfilePic");
-    DB.query("update user_details set user_pic = $1 where user_id = $2 and socket_id = $3",[data.image_data,data.user,data.id])
-    .then((updated) =>{
-        console.log("User pic updated");
-    }).catch((error) => {
-        console.log("Error while updating user pic",error);
-    });
+    DB.query("update user_details set user_pic = $1 where user_id = $2 and socket_id = $3", [data.image_data, data.user, data.id])
+        .then((updated) => {
+            console.log("User pic updated");
+            io.to(data.id).emit("profile-pic-uploaded", { "message": "Profile succesfully updated", "data": data.image_data });
+        }).catch((error) => {
+            console.log("Error while updating user pic", error);
+            io.to(data.id).emit("profile-pic-uploaded", { "message": "Unexception Error!" });
+        });
 }
 
 module.exports.updateProfilePic = updateProfilePic;
+
+// sendAttachment = (data, io) => {
+//     console.log("Inside sendAttachment");
+//     getConversationId(data, (cid) => {
+//         console.log("conversation id",cid);
+//         if (cid != null) {
+//             saveConversationReply(cid, message_details, function (reply_saved) {
+//                 if (reply_saved != null) {
+//                     getReceiverSocketId(message_details.receiver, function (receiver_socket) {
+//                         getSenderPic(message_details.sender, function (sender_pic) {
+//                             message_details.sender_pic = sender_pic;
+//                             io.to(receiver_socket).emit('new-message', message_details);
+//                             io.to(message_details.socket_id).emit('new-message', message_details);
+//                             console.log("Message sent");
+//                         })
+//                     })
+//                 } else {
+//                     io.to(message_details.socket_id).emit('error-occured', "could not send message to user");
+//                 }
+//             })
+//         } else {
+//             io.to(message_details.socket_id).emit('error-occured', "could not send message to user");
+//         }
+//         // DB.query("insert into conversation_reply values()")
+//     });
+// }
+
+// module.exports.sendAttachment = sendAttachment;

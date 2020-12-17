@@ -6,14 +6,13 @@ var options = {
 
 var pgp = require('pg-promise')(options); //postgre promise
 var cn = {
-    host: 'localhost', // 'localhost' is the default;
+    host: '', // 'localhost' is the default;
     port: 5432, // 5432 is the default;
-    database: '', // your database name
-    user: '', // Your database user
-    password: '', // Password of above user
+    database: '',
+    user: '',
+    password: '',
     charset: 'UTF8_GENERAL_CI'
 };
-
 
 var knex = require('knex')({
     client: 'pg',

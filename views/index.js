@@ -9,9 +9,9 @@ socket.on('socket-connected', function (data) {
 })
 
 socket.on('user-offline', (user) => {
-    console.log("User is offline", user);
-    console.log("Div found", $("div#" + user.user_id));
-    console.log('$("div#"+user.user_id+" .online_stat")', $("div#" + user.user_id + " span .online_stat").html());
+    // console.log("User is offline", user);
+    // console.log("Div found", $("div#" + user.user_id));
+    // console.log('$("div#"+user.user_id+" .online_stat")', $("div#" + user.user_id + " span .online_stat").html());
     if (user.status == "Online") {
         $("div#" + user.user_id + " span .online_stat").html(user.status);
         $("div#" + user.user_id + " span .online_stat").css({ "color": "greenyellow" });
@@ -24,7 +24,7 @@ socket.on('user-offline', (user) => {
 var allChats = [];
 socket.on('conversation-got', function (data) {
     data = data.data;
-    console.log("Data got is", data);
+    // console.log("Data got is", data);
     var messageWrapper = document.getElementsByClassName("message-wrap")[0];
     content.querySelector(".info .time").innerHTML = data.online_status;
     if (data.online_status == "Online") {
@@ -44,30 +44,52 @@ socket.on('conversation-got', function (data) {
             notMeDiv.setAttribute("class", "message-list speech-bubble");
             var meDiv = document.createElement("div");
             meDiv.setAttribute("class", "message-list me speech-bubble-me");
-            var messageDiv = document.createElement("div");
-            messageDiv.setAttribute("class", "msg");
-            var messagePara = document.createElement("p");
-            messagePara.innerHTML = allChats[i].reply;
+            // console.log("allChats[i].message_type", allChats[i].message_type);
+            if (allChats[i].message_type == 'text') {
+                var messageDiv = document.createElement("div");
+                messageDiv.setAttribute("class", "msg");
+                var messagePara = document.createElement("p");
+                messagePara.innerHTML = allChats[i].reply;
+            } else {
+                // console.log("Message type changed");
+                // makePicBubble(allChats[i].reply, allChats[i].user_id)
+                var messageDiv = document.createElement("div");
+                messageDiv.setAttribute("class", "msg");
+                var messagePara = document.createElement("img");
+                messagePara.setAttribute("src", allChats[i].reply);
+                messagePara.setAttribute("class", "attached_pic");
+            }
+
             if (allChats[i].length != 1 && allChats[i].reply != 'NA') {
                 if (allChats[i].user_id == userAuthId) {
                     var userPicMe = document.createElement("img");
-                    userPicMe.setAttribute("class", "user_pic_chat_me")
+                    // if (allChats[i].message_type == 'text') {
+                    userPicMe.setAttribute("class", "user_pic_chat_me user_pic_chat_me_img")
+                    if (allChats[i].message_type != 'text')
+                        userPicMe.setAttribute("style", "margin-top:140px")
+                    // userPicMe.setAttribute("class", "user_pic_chat_me")
                     userPicMe.setAttribute("src", $("#user_main").attr("src"));
-                    meDiv.appendChild(userPicMe);
                     messageDiv.appendChild(messagePara);
+                    meDiv.appendChild(userPicMe);
                     meDiv.appendChild(messageDiv);
+                    // }
                     messageWrapper.appendChild(meDiv);
                 }
                 else {
                     // console.log("user_id",allChats[i].user_id)
                     // console.log($("div#"+allChats[i].user_id+" img").attr("src"));
+                    // if (allChats[i].message_type == 'text') {
                     var userPicNotMe = document.createElement("img");
                     userPicNotMe.setAttribute("class", "user_pic_chat_not_me")
+                    if (allChats[i].message_type != 'text')
+                        userPicNotMe.setAttribute("style", "margin-top:140px")
+                    // userPicNotMe.setAttribute("class", "user_pic_chat_not_me")
                     // userPicNotMe.setAttribute("src", allChats[i].user_pic)
                     userPicNotMe.setAttribute("src", $("div#" + allChats[i].user_id + " img").attr("src"))
                     notMeDiv.appendChild(userPicNotMe);
                     messageDiv.appendChild(messagePara);
                     notMeDiv.appendChild(messageDiv);
+                    // }
                     messageWrapper.appendChild(notMeDiv);
                 }
             }
@@ -120,31 +142,58 @@ function click(l, index) {
 }
 
 socket.on("new-message", function (message) {
+    console.log("New message", message);
     var messageWrapper = document.getElementsByClassName("message-wrap")[0];
     var notMeDiv = document.createElement("div");
     notMeDiv.setAttribute("class", "message-list speech-bubble");
     var meDiv = document.createElement("div");
     meDiv.setAttribute("class", "message-list me speech-bubble-me");
-    var messageDiv = document.createElement("div");
-    messageDiv.setAttribute("class", "msg");
-    var messagePara = document.createElement("p");
-    messagePara.innerHTML = message.message;
+    if (message.type == 'text') {
+        var messageDiv = document.createElement("div");
+        messageDiv.setAttribute("class", "msg");
+        var messagePara = document.createElement("p");
+        messagePara.innerHTML = message.message;
+    } else {
+        // console.log("Message type changed");
+        // makePicBubble(message.message, message.sender)
+        var messageDiv = document.createElement("div");
+        messageDiv.setAttribute("class", "msg");
+        var messagePara = document.createElement("img");
+        messagePara.setAttribute("src", message.message);
+        messagePara.setAttribute("class", "attached_pic")
+    }
+    // var messageDiv = document.createElement("div");
+    // messageDiv.setAttribute("class", "msg");
+    // var messagePara = document.createElement("p");
+    // messagePara.innerHTML = message.message;
     if (message.sender == userAuthId) {
+        // console.log('$("#user_main").attr("src")', $("#user_main").attr("src"))
         var userPicMe = document.createElement("img");
-        userPicMe.setAttribute("class", "user_pic_chat_me")
-        userPicMe.setAttribute("src", message.sender_pic)
+        userPicMe.setAttribute("class", "user_pic_chat_me user_pic_chat_me_img")
+        if (message.type != 'text')
+            userPicMe.setAttribute("style", "margin-top:140px")
+        userPicMe.setAttribute("src", $("#user_main").attr("src"))
         meDiv.appendChild(userPicMe);
+        // if (message.type == 'text') {
         messageDiv.appendChild(messagePara);
         meDiv.appendChild(messageDiv);
+        // }
         messageWrapper.appendChild(meDiv);
     }
     else {
+        // console.log("Not me")
         var userPicNotMe = document.createElement("img");
-        userPicNotMe.setAttribute("class", "user_pic_chat_not_me")
-        userPicNotMe.setAttribute("src", message.sender_pic)
+        userPicNotMe.setAttribute("class", "user_pic_chat_not_me user_pic_chat_not_me_img")
+        if (message.type != 'text')
+            userPicNotMe.setAttribute("style", "margin-top:140px")
+        userPicNotMe.setAttribute("src", $("div#" + message.sender + " img").attr("src"))
         notMeDiv.appendChild(userPicNotMe);
+        // messageDiv.appendChild(messagePara);
+        // notMeDiv.appendChild(messageDiv);
+        // if (message.type == 'text') {
         messageDiv.appendChild(messagePara);
         notMeDiv.appendChild(messageDiv);
+        // }
         messageWrapper.appendChild(notMeDiv);
     }
 })
@@ -366,14 +415,14 @@ function timeoutFunction() {
 }
 
 document.addEventListener('keyup', function () {
-    console.log("Key typing in process");
+    // console.log("Key typing in process");
     socket.emit('typing', { user_id: userAuthId, receiver: window.localStorage.getItem("user_selected"), typing: true });
     clearTimeout(timeout)
     timeout = setTimeout(timeoutFunction, 2000)
 })
 
 socket.on('typing', function (data) {
-    console.log("User is typing", data);
+    // console.log("User is typing", data);
     if (data.typing) {
         $("#typing_status").html("typing...");
         // $("div#" + data.user_id + " span .online_stat").html($("div#" + data.user_id + " span .online_stat").html()+" typing...");
@@ -565,6 +614,7 @@ function darkModeEnableDisable() {
         $(".communication_channel .fa-video-camera").css({ "color": "#a9a9a9" })
         $(".communication_channel .material-icons").css({ "color": "#a9a9a9" })
         $(".fa-paper-plane").css({ "color": "#a9a9a9" })
+        $(".fa-paperclip").css({ "color": "#a9a9a9" })
         $(".modern-form").css({ "background": "#37474F" })
         $("#fullmodal").css({ "background": "#37474F" })
         $('#fullmodal input').css({ "background": "#263238" })
@@ -608,6 +658,7 @@ function darkModeEnableDisable() {
         $(".communication_channel .fa-video-camera").css({ "color": "#000000" })
         $(".communication_channel .material-icons").css({ "color": "#000000" })
         $(".fa-paper-plane").css({ "color": "#000000" })
+        $(".fa-paperclip").css({ "color": "#000000" })
         $(".modern-form").css({ "background": "#ffffff" })
         $("#fullmodal").css({ "background": "#ffffff" })
         $('#fullmodal input').css({ "background": "#ffffff" })
@@ -683,7 +734,68 @@ compressImg = (img) => {
 }
 
 socket.on("profile-pic-uploaded", (data) => {
+    console.log("Profile pic succesfully uploaded", data);
+    $('#snackbar').html(data.message);
 
+    var x = document.getElementById("snackbar");
+    // Add the "show" class to DIV
+    x.className = "show";
+    // After 3 seconds, remove the show class from DIV
+    setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+    $('.user_pic_large').attr("src", data.data);
+    $("#user_main").attr("src", data.data);
 })
 
+$('#attach_file').click(function () {
+    $('#fileToSend').click();
+});
 
+$('#fileToSend').change(async () => {
+    var pics = $('#fileToSend').prop('files');
+    console.log("Files selected", pics[0]);
+    const base64 = await convertToBase(pics[0]);
+    console.log("Image length", base64.length);
+    makePicBubble(base64, userAuthId);
+    sendImage(base64);
+});
+
+makePicBubble = (base64, user_id) => {
+    var messageWrapper = document.getElementsByClassName("message-wrap")[0];
+    var notMeDiv = document.createElement("div");
+    notMeDiv.setAttribute("class", "message-list speech-bubble");
+    var meDiv = document.createElement("div");
+    meDiv.setAttribute("class", "message-list me speech-bubble-me");
+    var messageDiv = document.createElement("div");
+    messageDiv.setAttribute("class", "msg");
+    var imgMsg = document.createElement("img");
+    imgMsg.setAttribute("src", base64);
+    imgMsg.setAttribute("class", "attached_pic")
+    if (user_id == userAuthId) {
+        var userPicMe = document.createElement("img");
+        userPicMe.setAttribute("class", "user_pic_chat_me user_pic_chat_me_img")
+        userPicMe.setAttribute("src", $("#user_main").attr("src"))
+        userPicMe.setAttribute("style", "margin-top:140px")
+        meDiv.appendChild(userPicMe);
+        messageDiv.appendChild(imgMsg);
+        meDiv.appendChild(messageDiv);
+        messageWrapper.appendChild(meDiv);
+    }
+    else {
+        var userPicNotMe = document.createElement("img");
+        userPicNotMe.setAttribute("class", "user_pic_chat_not_me user_pic_chat_me_img")
+        userPicNotMe.setAttribute("src", $("div#" + user_id + " img").attr("src"))
+        userPicNotMe.setAttribute("style", "margin-top:140px")
+        notMeDiv.appendChild(userPicNotMe);
+        messageDiv.appendChild(imgMsg);
+        notMeDiv.appendChild(messageDiv);
+        messageWrapper.appendChild(notMeDiv);
+    }
+}
+
+sendImage = (base_image) => {
+    socket.emit("send-attachment", { sender: userAuthId, id: socket.id, message: base_image, receiver: window.localStorage.getItem("user_selected"), type: "image" });
+}
+
+socket.on("attachment-sent", (data) => {
+    console.log("Attachment sent");
+})

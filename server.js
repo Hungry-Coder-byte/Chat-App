@@ -99,6 +99,10 @@ io.on('connection', (socket) => {
     socket.on('update-profile-pic', (data) => {
         route.updateProfilePic(data, io);
     });
+    socket.on('send-attachment', (data) => {
+        console.log("Attachment to send", data.sender, data.id, data.message.length, data.receiver);
+        route.sendMessage(data, io);
+    });
     socket.on('disconnect', () => {
         console.log("User disconnected", socket.id);
         route.setOnlineStatus(socket.id, "Offline", io);

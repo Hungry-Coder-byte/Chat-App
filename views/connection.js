@@ -38,8 +38,12 @@ angular.module('myApp', [])
                     span1.setAttribute("class", "user");
                     span1.innerHTML = chats[i].user_name;
                     var span2 = document.createElement("span");
-                    span2.setAttribute("class", "text");
                     span2.innerHTML = chats[i].reply;
+                    if(chats[i].message_type != 'text'){
+                        span2 = document.createElement("img");
+                        span2.setAttribute("src",chats[i].reply);
+                    }
+                    span2.setAttribute("class", "text");
                     var span3 = document.createElement("span");
                     span3.setAttribute("class", "time");
                     var event = new Date(chats[i].time);
@@ -165,6 +169,7 @@ angular.module('myApp', [])
                 $(".communication_channel .fa-video-camera").css({ "color": "#a9a9a9" })
                 $(".communication_channel .material-icons").css({ "color": "#a9a9a9" })
                 $(".fa-paper-plane").css({ "color": "#a9a9a9" })
+                $(".fa-paperclip").css({ "color": "#a9a9a9" })
                 $(".modern-form").css({ "background": "#37474F" })
                 $("#fullmodal").css({ "background": "#37474F" })
                 $('#fullmodal input').css({ "background": "#263238" })
