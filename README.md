@@ -66,13 +66,13 @@ Go to https://www.guru99.com/download-install-postgresql.html and follow the ste
 
 <h1>To Make Video Call Feature Working, Jitsi is required</h2>
 
-  Github - https://github.com/jitsi/jitsi-meet (Clone this repo)
-  Developer Guide - https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-web (Follow guide for advance features)
+  Github - https://github.com/jitsi/jitsi-meet (Clone this repo)<br>
+  Developer Guide - https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-web (Follow guide for advance features)<br>
   
   Follow below steps to run Jitsi on your machine -
   
-   Step 1 - Clone the repository from the above Github url<br>
-   Step 2 - Install required dependencies using command - <strong>npm install</strong><br>
-   Step 3 - Start Jitsi server using - <strong>make dev</strong>
+   Step 1 - Clone the repository from the above Github url <br>
+   Step 2 - Install required dependencies using command - <strong>npm install</strong> <br>
+   Step 3 - Start Jitsi server using - <strong>make dev</strong><br>
    
   Server will be succesfully started on https://localhost:8080 
