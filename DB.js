@@ -11,7 +11,7 @@ var cn = {
     database: '', // your database name
     user: '', // Your database user
     password: '', // Password of above user
-    charset: 'UTF8_GENERAL_CI'
+    charset: 'UTF8_GENERAL_CI',
 };
 
 
