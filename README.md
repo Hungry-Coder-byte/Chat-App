@@ -5,6 +5,7 @@ Chat-App is a simple and secure chat application where you have messages stored 
 <ul>
   <li>Send Text Messages</li>
   <li>Send Images</li>
+  <li>Dark Mode</li>
   <li>Video Calling</li>
 </ul>
 <br>
