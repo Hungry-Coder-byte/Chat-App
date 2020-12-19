@@ -6,11 +6,11 @@ var options = {
 
 var pgp = require('pg-promise')(options); //postgre promise
 var cn = {
-    host: '', // 'localhost' is the default;
+    host: 'localhost', // 'localhost' is the default;
     port: 5432, // 5432 is the default;
-    database: '',
-    user: '',
-    password: '',
+    database: 'bms_v2',
+    user: 'bms',
+    password: 'password',
     charset: 'UTF8_GENERAL_CI'
 };
 

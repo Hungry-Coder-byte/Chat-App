@@ -64,3 +64,26 @@ CREATE TABLE conversation_reply
       REFERENCES users (user_id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
 );
+
+create table current_drawings
+(
+image_id text primary key
+,sender text not null references users(user_id)
+,receiver text not null references users(user_id)
+,is_done boolean default false
+,createdtm numeric DEFAULT date_part('epoch'::text, now())
+,updatedtm numeric DEFAULT date_part('epoch'::text, now())
+);
+
+create sequence coSeq start with 1;
+
+create table drawing_coordinates
+(
+image_id text references current_drawings(image_id)
+,x0 numeric not null
+,y0 numeric not null
+,x1 numeric not null
+,y1 numeric not null
+,color text not null
+,seq bigint not null default nextval('coSeq')
+);
