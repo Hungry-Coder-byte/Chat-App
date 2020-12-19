@@ -497,3 +497,66 @@ module.exports.updateProfilePic = updateProfilePic;
 // }
 
 // module.exports.sendAttachment = sendAttachment;
+
+const sendCoordinatesToUser = (data, io) => {
+    console.log("Inside sendCoordinatesToUser");
+    saveCoordinates(data, (saved) => {
+        getReceiverSocketId(data.receiver, function (receiver_socket) {
+            io.to(receiver_socket).emit("drawing", data);
+        })
+    })
+}
+
+saveCoordinates = (data, callback) => {
+    DB.query("insert into drawing_coordinates values($1,$2,$3,$4,$5,$6)", [data.image_id, data.x0, data.y0, data.x1, data.y1, data.color])
+        .then((saved) => {
+            callback(saved);
+        }).catch((error) => {
+            console.log("Error while saving image coordinates", error);
+            callback(-1);
+        })
+}
+
+module.exports.sendCoordinatesToUser = sendCoordinatesToUser;
+
+const createImageId = async (data, io) => {
+    console.log("Inside createImageId");
+    const image_id = await generateImageId(data);
+    if (image_id != -1)
+        io.to(data.id).emit("image-id-created", { img_id: image_id });
+    else {
+        io.to(data.id).emit("image-id-creation-error", { message: "Oops! Something Went Wrong!" })
+    }
+}
+
+generateImageId = (data) => {
+    return new Promise(resolve => {
+        deleteOldImage(data, (check) => {
+            if (check == 1) {
+                DB.query("insert into current_drawings values($1,$2,$3) returning image_id", [cuid(), data.sender, data.receiver])
+                    .then((inserted) => {
+                        console.log("New image id created");
+                        resolve(inserted[0].image_id)
+                    }).catch((error) => {
+                        console.log("Error while inserting new image details", error);
+                        resolve(-1)
+                    })
+            } else {
+                resolve(-1)
+            }
+        })
+    })
+}
+
+deleteOldImage = (data, callback) => {
+    console.log("Inside deleteOldImage");
+    DB.query("update current_drawings set is_done = true where sender = $1 and receiver = $2", [data.sender, data.receiver])
+        .then((updated) => {
+            callback(1);
+        }).catch((error) => {
+            console.log("Error while deleting old image", error);
+            callback(-1)
+        })
+}
+
+module.exports.createImageId = createImageId;

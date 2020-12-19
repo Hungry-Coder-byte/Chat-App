@@ -10,7 +10,6 @@ angular.module('myApp', [])
         $scope.getAllChats = function () {
             $scope.no_chat_found = null;
             // document.getElementsByClassName("list-wrap")[0]
-            $(".list-wrap").empty();
             // console.log("Inside getAllChats");
             // $http.get('https://4676e84e.ngrok.io/user_chats/' + "7c6de410-8e33-11ea-88ee-b46d830ab42d").then(function (response) {
             var user_id = window.localStorage.getItem("user");
@@ -188,9 +187,14 @@ angular.module('myApp', [])
 
         $scope.searchChat = () => {
             console.log("Inside searchChat", $scope.chat_search);
-            if ($scope.chat_search != null && $scope.chat_search.trim().length >= 2)
+            if ($scope.chat_search != null && $scope.chat_search.trim().length >= 2) {
+                $(".list-wrap").empty();
                 $scope.getAllChats();
-            else
+            }
+            else{
+                // $(".list-wrap").empty();
+                // $scope.getAllChats();
                 $scope.getAllChats(null);
+            }
         }
     }]);

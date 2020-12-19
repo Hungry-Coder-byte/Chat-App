@@ -41,9 +41,10 @@ socket.on('conversation-got', function (data) {
         c = 0;
         for (var i = allChats.length - 1; i >= 0; i--) {
             var notMeDiv = document.createElement("div");
-            notMeDiv.setAttribute("class", "message-list speech-bubble");
             var meDiv = document.createElement("div");
             meDiv.setAttribute("class", "message-list me speech-bubble-me");
+            notMeDiv.setAttribute("class", "message-list speech-bubble");
+
             // console.log("allChats[i].message_type", allChats[i].message_type);
             if (allChats[i].message_type == 'text') {
                 var messageDiv = document.createElement("div");
@@ -58,6 +59,10 @@ socket.on('conversation-got', function (data) {
                 var messagePara = document.createElement("img");
                 messagePara.setAttribute("src", allChats[i].reply);
                 messagePara.setAttribute("class", "attached_pic");
+            }
+
+            if (allChats[i].message_type == 'canvas') {
+                messageDiv.setAttribute("style", "background:#ffffff");
             }
 
             if (allChats[i].length != 1 && allChats[i].reply != 'NA') {
@@ -671,8 +676,8 @@ var current_chat_pos = -1;
 
 function chatMoreOpts(pos) {
     console.log("position", pos)
-    console.log("top position", $('.list').eq(pos).position())
-    if ($("#chat_opts").css("display") == "none" || current_chat_pos != pos)
+    console.log("top position", $('.list').eq(pos).position(), $("#chat_opts").css("display"))
+    if ($("#chat_opts").css("display") == undefined || $("#chat_opts").css("display") == "none" || current_chat_pos != pos)
         $("#chat_opts").css({ "display": "block", "top": $('.list').eq(pos).position().top });
     else
         $("#chat_opts").css({ "display": "none" });
@@ -750,16 +755,234 @@ $('#attach_file').click(function () {
     $('#fileToSend').click();
 });
 
+$('.floatingButton').on('click',
+    function (e) {
+        e.preventDefault();
+        $(this).toggleClass('open');
+        if ($(this).children('.fa').hasClass('fa-plus')) {
+            $(this).children('.fa').removeClass('fa-plus');
+            $(this).children('.fa').addClass('fa-close');
+        }
+        else if ($(this).children('.fa').hasClass('fa-close')) {
+            $(this).children('.fa').removeClass('fa-close');
+            $(this).children('.fa').addClass('fa-plus');
+        }
+        $('.floatingMenu').stop().slideToggle();
+    }
+);
+
+var canvas = document.getElementsByClassName('whiteboard')[0];
+var colors = document.getElementsByClassName('color');
+
+$('#drawing').click(async () => {
+    getImageIdFromServer();
+})
+
+getImageIdFromServer = () => {
+    socket.emit('create-image-id', { sender: userAuthId, receiver: window.localStorage.getItem("user_selected"), id: socket.id });
+}
+
+socket.on("image-id-created", (data) => {
+    console.log("Image id got", data);
+    window.localStorage.setItem("image_id", data.img_id);
+    $(".drawingScreen").fadeIn("fast");
+
+    console.log("canvas is", canvas);
+
+    canvas.addEventListener('mousedown', onMouseDown, false);
+    canvas.addEventListener('mouseup', onMouseUp, false);
+    canvas.addEventListener('mouseout', onMouseUp, false);
+    canvas.addEventListener('mousemove', throttle(onMouseMove, 10), false);
+
+    //Touch support for mobile devices
+    canvas.addEventListener('touchstart', onMouseDown, false);
+    canvas.addEventListener('touchend', onMouseUp, false);
+    canvas.addEventListener('touchcancel', onMouseUp, false);
+    canvas.addEventListener('touchmove', throttle(onMouseMove, 10), false);
+
+    for (var i = 0; i < colors.length; i++) {
+        colors[i].addEventListener('click', onColorUpdate, false);
+    }
+
+    window.addEventListener('resize', onResize, false);
+    onResize();
+});
+
+var context = canvas.getContext('2d');
+
+var current = {
+    color: 'black'
+};
+var drawing = false;
+
+function drawLine(x0, y0, x1, y1, color, emit) {
+    context.beginPath();
+    context.moveTo(x0, y0);
+    context.lineTo(x1, y1);
+    context.strokeStyle = color;
+    context.lineWidth = 2;
+    context.stroke();
+    context.closePath();
+
+    if (!emit) { return; }
+    var w = canvas.width;
+    var h = canvas.height;
+
+    socket.emit('drawing', {
+        x0: x0 / w,
+        y0: y0 / h,
+        x1: x1 / w,
+        y1: y1 / h,
+        color: color,
+        width: canvas.width,
+        height: canvas.height,
+        user_id: userAuthId,
+        receiver: window.localStorage.getItem("user_selected"),
+        image_id: window.localStorage.getItem("image_id")
+    });
+}
+
+var points = [];
+
+function onMouseDown(e) {
+    drawing = true;
+    current.x = e.clientX || e.touches[0].clientX;
+    current.y = e.clientY || e.touches[0].clientY;
+    points.push({
+        x: current.x,
+        y: current.y,
+        size: 2,
+        color: current.color,
+        mode: "draw"
+    });
+}
+
+function onMouseUp(e) {
+    if (!drawing) { return; }
+    drawing = false;
+    drawLine(current.x, current.y, e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY, current.color, true);
+}
+
+function onMouseMove(e) {
+    if (!drawing) { return; }
+    drawLine(current.x, current.y, e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY, current.color, true);
+    current.x = e.clientX || e.touches[0].clientX;
+    current.y = e.clientY || e.touches[0].clientY;
+}
+
+function onColorUpdate(e) {
+    current.color = e.target.className.split(' ')[1];
+}
+
+// limit the number of events per second
+function throttle(callback, delay) {
+    var previousCall = new Date().getTime();
+    return function () {
+        var time = new Date().getTime();
+
+        if ((time - previousCall) >= delay) {
+            previousCall = time;
+            callback.apply(null, arguments);
+        }
+    };
+}
+
+function onDrawingEvent(data) {
+    console.log("on drawing event")
+    var w = canvas.width;
+    var h = canvas.height;
+    drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color);
+}
+
+// make the canvas fill its parent
+function onResize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+socket.on('drawing', onDrawingEvent);
+
+undoDraw = () => {
+    console.log("undoDraw", points);
+    points.pop();
+    console.log("points",points);
+    redrawAll();
+}
+
+socket.on('undo-draw', (data) => {
+    // add the "undone" point to a separate redo array
+    redoStack.unshift(data);
+    // redraw all the remaining points
+    redrawAll();
+})
+
+function redrawAll() {
+
+    if (points.length == 0) { return; }
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (var i = 0; i < points.length; i++) {
+
+        var pt = points[i];
+
+        var begin = false;
+
+        if (context.lineWidth != pt.size) {
+            context.lineWidth = pt.size;
+            begin = true;
+        }
+        if (context.strokeStyle != pt.color) {
+            context.strokeStyle = pt.color;
+            begin = true;
+        }
+        if (pt.mode == "begin" || begin) {
+            context.beginPath();
+            context.moveTo(pt.x, pt.y);
+        }
+        context.lineTo(pt.x, pt.y);
+        if (pt.mode == "end" || (i == points.length - 1)) {
+            context.stroke();
+        }
+    }
+    context.stroke();
+}
+
+$(this).on('click', function (e) {
+    var container = $(".floatingButton");
+
+    // if the target of the click isn't the container nor a descendant of the container
+    if (!container.is(e.target) && $('.floatingButtonWrap').has(e.target).length === 0) {
+        if (container.hasClass('open')) {
+            container.removeClass('open');
+        }
+        if (container.children('.fa').hasClass('fa-close')) {
+            container.children('.fa').removeClass('fa-close');
+            container.children('.fa').addClass('fa-plus');
+        }
+        $('.floatingMenu').hide();
+    }
+});
+
+sendDrawingImage = () => {
+    dataURL = canvas.toDataURL();
+    console.log("Image data", dataURL);
+    socket.emit('send-attachment', { sender: userAuthId, id: socket.id, message: dataURL, receiver: window.localStorage.getItem("user_selected"), type: "canvas" })
+    makePicBubble(dataURL,userAuthId,"canvas");
+    $(".drawingScreen").fadeOut("fast");
+    points = [];
+}
+
 $('#fileToSend').change(async () => {
     var pics = $('#fileToSend').prop('files');
     console.log("Files selected", pics[0]);
     const base64 = await convertToBase(pics[0]);
     console.log("Image length", base64.length);
-    makePicBubble(base64, userAuthId);
+    makePicBubble(base64, userAuthId,null);
     sendImage(base64);
 });
 
-makePicBubble = (base64, user_id) => {
+makePicBubble = (base64, user_id,message_type) => {
     var messageWrapper = document.getElementsByClassName("message-wrap")[0];
     var notMeDiv = document.createElement("div");
     notMeDiv.setAttribute("class", "message-list speech-bubble");
@@ -770,6 +993,9 @@ makePicBubble = (base64, user_id) => {
     var imgMsg = document.createElement("img");
     imgMsg.setAttribute("src", base64);
     imgMsg.setAttribute("class", "attached_pic")
+    if (message_type == 'canvas') {
+        messageDiv.setAttribute("style", "background:#ffffff");
+    }
     if (user_id == userAuthId) {
         var userPicMe = document.createElement("img");
         userPicMe.setAttribute("class", "user_pic_chat_me user_pic_chat_me_img")

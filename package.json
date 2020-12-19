@@ -12,6 +12,7 @@
     "@types/socket.io": "^2.1.2",
     "bluebird": "^3.7.2",
     "bookshelf": "^1.2.0",
+    "canvas": "^2.6.1",
     "cuid": "^2.1.8",
     "express": "^4.17.1",
     "knex": "^0.21.6",

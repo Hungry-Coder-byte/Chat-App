@@ -4,6 +4,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const socketsArray = [];
 const route = require('./routes/chats.js');
+const cuid = require("cuid");
 
 app.use(express.static(path.join(__dirname, '/views')));
 app.use(express.static('public'));
@@ -102,6 +103,14 @@ io.on('connection', (socket) => {
     socket.on('send-attachment', (data) => {
         console.log("Attachment to send", data.sender, data.id, data.message.length, data.receiver);
         route.sendMessage(data, io);
+    });
+    socket.on('create-image-id', (data) => {
+        route.createImageId(data, io);
+    })
+    socket.on('drawing', (data) => {
+        console.log(data);
+        route.sendCoordinatesToUser(data, io);
+        // socket.broadcast.emit('drawing', data);
     });
     socket.on('disconnect', () => {
         console.log("User disconnected", socket.id);

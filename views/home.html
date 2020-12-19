@@ -175,9 +175,40 @@
         </div>
         <div class="message-footer" style="display: none;">
             <input type="text" data-placeholder="Send a message to {0}" id="message_to_send" />
-            <i class="fa fa-paperclip" aria-hidden="true" id="attach_file"></i>
+            <i class="fa fa-paperclip floatingButton" aria-hidden="true"></i>
             <i class="fa fa-paper-plane" aria-hidden="true" onclick="sendMessage()" id="send_message"></i>
             <input id='fileToSend' type='file' style="display: none;">
+        </div>
+        <div class="floatingButtonWrap">
+            <div class="floatingButtonInner">
+                <ul class="floatingMenu">
+                    <li>
+                        <a href="" id="attach_file">Photo</a>
+                    </li>
+                    <li>
+                        <a href="" id="drawing">Drawing</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="drawingScreen">
+            <canvas class="whiteboard"></canvas>
+            <div class="colors">
+                <div class="color black"></div>
+                <div class="color red"></div>
+                <div class="color green"></div>
+                <div class="color blue"></div>
+                <div class="color yellow"></div>
+                <!-- <span class="color-picker">
+                    <label for="colorPicker">
+                        <input type="color" value="#1DB8CE" id="colorPicker">
+                    </label>
+                </span> -->
+            </div>
+            <div class="action-btns">
+                <button onclick="undoDraw()">Clear</button>
+                <button onclick="sendDrawingImage()">Submit</button>
+            </div>
         </div>
     </div>
     <div id="id01" class="w3-modal">
@@ -206,3 +237,18 @@
 <script src="./chat.js"></script>
 <script src="/socket.js"></script>
 <script type="text/javascript" src="/index.js"></script>
+<script>
+    document.querySelectorAll('input[type=color]').forEach(function (picker) {
+
+        var targetLabel = document.querySelector('label[for="' + picker.id + '"]'),
+            codeArea = document.createElement('span');
+
+        codeArea.innerHTML = picker.value;
+        targetLabel.appendChild(codeArea);
+
+        picker.addEventListener('change', function () {
+            codeArea.innerHTML = picker.value;
+            targetLabel.appendChild(codeArea);
+        });
+    });
+</script>
