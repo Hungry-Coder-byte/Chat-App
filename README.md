@@ -8,6 +8,7 @@ Chat-App is a simple and secure chat application where you have messages stored 
   <li>Send Live Drawings</li>
   <li>Dark Mode</li>
   <li>Video Calling</li>
+  <li>Add Tag To Chat</li>
 </ul>
 <br>
 <br>
