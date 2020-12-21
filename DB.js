@@ -11,7 +11,7 @@ var cn = {
     database: '',
     user: '',
     password: '',
-    charset: 'UTF8_GENERAL_CI'
+    charset: 'UTF8_GENERAL_CI',
 };
 
 var knex = require('knex')({
