@@ -18,7 +18,7 @@ angular.module('myApp', [])
             else
                 chat_search = $scope.chat_search;
             $http.get('http://localhost:5001/user_chats/' + user_id + '/' + chat_search).then(function (response) {
-                console.log("response", response.data);
+                // console.log("response", response.data);
                 $scope.allChats = response.data.chats;
                 $scope.user_pic = response.data.user_pic;
                 $("#user_main").fadeIn("normal");
@@ -29,65 +29,81 @@ angular.module('myApp', [])
         function createChatCards(chats) {
             if (chats.length > 0) {
                 for (var i = 0; i < chats.length; i++) {
-                    var div1 = document.createElement('div');
-                    div1.setAttribute('id', chats[i].user_id);
-                    div1.setAttribute('class', "list");
-                    div1.setAttribute("onClick", "getConversation('" + chats[i].user_id + "')")
-                    var img = document.createElement('img');
-                    img.setAttribute("src", chats[i].user_pic);
-                    img.setAttribute("alt", "");
-                    div1.appendChild(img);
-                    var div2 = document.createElement("div");
-                    div2.setAttribute("class", "info");
-                    var span1 = document.createElement("span");
-                    span1.setAttribute("class", "user");
-                    span1.innerHTML = chats[i].user_name;
-                    var span2 = document.createElement("span");
-                    span2.innerHTML = chats[i].reply;
-                    span2.setAttribute("class", "text");
-                    if (chats[i].message_type != 'text') {
-                        span2 = document.createElement("i");
-                        span2.setAttribute("class", "fa fa-image")
-                        // span2.setAttribute("src",chats[i].reply);
-                        // <i class="fas fa-image"></i>
+                    if (chats[i].is_archieved == false) {
+                        var div1 = document.createElement('div');
+                        div1.setAttribute('id', chats[i].user_id);
+                        div1.setAttribute('class', "list");
+                        div1.setAttribute("onClick", "getConversation('" + chats[i].user_id + "')")
+                        var img = document.createElement('img');
+                        img.setAttribute("src", chats[i].user_pic);
+                        img.setAttribute("alt", "");
+                        div1.appendChild(img);
+                        var div2 = document.createElement("div");
+                        div2.setAttribute("class", "info");
+                        var span1 = document.createElement("span");
+                        span1.setAttribute("class", "user");
+                        span1.innerHTML = chats[i].user_name;
+                        var span2 = document.createElement("span");
+                        span2.innerHTML = chats[i].reply;
+                        span2.setAttribute("class", "text");
+                        if (chats[i].message_type != 'text') {
+                            span2 = document.createElement("i");
+                            span2.setAttribute("class", "fa fa-image")
+                            // span2.setAttribute("src",chats[i].reply);
+                            // <i class="fas fa-image"></i>
+                        }
+
+                        var span3 = document.createElement("span");
+                        span3.setAttribute("class", "time");
+                        var event = new Date(chats[i].time);
+                        if (Number(chats[i].direct) == 0) {
+                            chats[i].time = event.toLocaleTimeString(navigator.language, { hour: '2-digit', minute: '2-digit' });
+                        } else if (Number(chats[i].direct) > 0 && Number(chats[i].direct) <= 7) {
+                            // console.log(chats[i].time)
+                            var options = { weekday: 'long' };
+                            chats[i].time = event.toLocaleDateString('en-US', options);
+                        } else {
+                        }
+                        span3.innerHTML = chats[i].time;
+                        var online_stat = document.createElement("span");
+                        if (chats[i].online_status == "Online") {
+                            online_stat.setAttribute("class", "online_stat online");
+                            online_stat.innerHTML = chats[i].online_status;
+                        } else {
+                            online_stat.setAttribute("class", "online_stat offline");
+                            online_stat.innerHTML = chats[i].online_status;
+                        }
+                        var expand = document.createElement("span");
+                        expand.setAttribute("class", "material-icons expand-more");
+                        expand.setAttribute("onClick", "chatMoreOpts(" + i + ")")
+                        expand.innerHTML = "expand_more";
+                        div2.appendChild(span1);
+                        div2.appendChild(span2);
+                        div1.appendChild(div2);
+                        span3.appendChild(document.createElement("br"));
+                        span3.appendChild(online_stat);
+                        // console.log("chats[i].tag_name.trim().length", chats[i].tag_name.trim().length)
+                        if (chats[i].tag_name.trim().length > 0) {
+                            var span4 = document.createElement("span");
+                            span4.setAttribute("class", "tag fa fa-tags");
+                            // span4.setAttribute("style","transform: rotate(90deg);")
+                            span4.setAttribute("style", "color:gold;")
+                            // var span5 = document.createElement("span");
+                            // span5.setAttribute("class", "tg_name");
+                            // span5.setAttribute("style", "display:none;");
+                            // span5.innerHTML = "  " + chats[i].tag_name;
+                            // span4.append(span5);
+                            div1.append(span4);
+                        }
+                        div1.appendChild(span3);
+                        div1.appendChild(expand);
+                        var wrapper = document.getElementsByClassName("list-wrap")[0];
+                        wrapper.appendChild(div1);
                     }
-                    var span3 = document.createElement("span");
-                    span3.setAttribute("class", "time");
-                    var event = new Date(chats[i].time);
-                    if (Number(chats[i].direct) == 0) {
-                        chats[i].time = event.toLocaleTimeString(navigator.language, { hour: '2-digit', minute: '2-digit' });
-                    } else if (Number(chats[i].direct) > 0 && Number(chats[i].direct) <= 7) {
-                        // console.log(chats[i].time)
-                        var options = { weekday: 'long' };
-                        chats[i].time = event.toLocaleDateString('en-US', options);
-                    } else {
-                    }
-                    span3.innerHTML = chats[i].time;
-                    var online_stat = document.createElement("span");
-                    if (chats[i].online_status == "Online") {
-                        online_stat.setAttribute("class", "online_stat online");
-                        online_stat.innerHTML = chats[i].online_status;
-                    } else {
-                        online_stat.setAttribute("class", "online_stat offline");
-                        online_stat.innerHTML = chats[i].online_status;
-                    }
-                    var expand = document.createElement("span");
-                    expand.setAttribute("class", "material-icons expand-more");
-                    expand.setAttribute("onClick", "chatMoreOpts(" + i + ")")
-                    expand.innerHTML = "expand_more";
-                    div2.appendChild(span1);
-                    div2.appendChild(span2);
-                    div1.appendChild(div2);
-                    span3.appendChild(document.createElement("br"));
-                    span3.appendChild(online_stat);
-                    div1.appendChild(span3);
-                    div1.appendChild(expand);
-                    var wrapper = document.getElementsByClassName("list-wrap")[0];
-                    wrapper.appendChild(div1);
+                    process();
                 }
-                process();
             } else {
-                console.log("No chat found");
+                // console.log("No chat found");
                 $scope.no_chat_found = "No chats Available";
             }
         }
@@ -177,21 +193,25 @@ angular.module('myApp', [])
                 $(".communication_channel .material-icons").css({ "color": "#a9a9a9" })
                 $(".fa-paper-plane").css({ "color": "#a9a9a9" })
                 $(".fa-paperclip").css({ "color": "#a9a9a9" })
+                $(".fa-smile-o").css({ "color": "#a9a9a9" });
                 $(".modern-form").css({ "background": "#37474F" })
                 $("#fullmodal").css({ "background": "#37474F" })
                 $('#fullmodal input').css({ "background": "#263238" })
                 $('#fullmodal input').css({ "color": "#ffffff" })
                 $("#typing_status").css({ "color": "#ffffff" });
+                $(".tab-nav button").css({ "color": "#ffffff" });
+                $(".emoji-picker").css({ "background-color": "#303841" });
+                $(".emoji-selectables").css({ "background-color": "#212427" });
             }
         }
 
         $scope.searchChat = () => {
-            console.log("Inside searchChat", $scope.chat_search);
+            // console.log("Inside searchChat", $scope.chat_search);
             if ($scope.chat_search != null && $scope.chat_search.trim().length >= 2) {
                 $(".list-wrap").empty();
                 $scope.getAllChats();
             }
-            else{
+            else {
                 // $(".list-wrap").empty();
                 // $scope.getAllChats();
                 $scope.getAllChats(null);

@@ -90,7 +90,7 @@ var getChats = function (req, res, next) {
     DB.query("select user_pic from user_details where user_id = $1", req.params.user_id)
         .then(function (user_pic) {
             finalData.user_pic = user_pic[0].user_pic;
-            DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,U.online_status,C.c_id,R.reply,now()::date - to_timestamp(R.time)::date as direct,to_timestamp(R.time)::date as time,R.message_type\
+            DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,U.online_status,C.c_id,R.reply,now()::date - to_timestamp(R.time)::date as direct,to_timestamp(R.time)::date as time,R.message_type,C.tag_name,C.is_muted,C.is_archieved\
             FROM user_details U,conversation C, conversation_reply R\
             WHERE \
             CASE\
@@ -166,7 +166,7 @@ var getConversations = function (user, socket, io) {
     console.log("Inside getConversations", user.user_id, user.page_num);
     var limit = 20;
     var offset = limit * ((user.page_num + 1) - 1)
-    DB.query("select CR.user_id,CR.time,CR.reply,C.wallpaper,CR.message_type from conversation_reply CR,conversation C,user_details U where CR.c_id = C.c_id and U.user_id = CR.user_id and ((user_one = $1 or  user_two = $1) and (user_one = $4 or  user_two = $4)) order by time desc limit $2 offset $3", [user.user_id, limit, offset, user.user])
+    DB.query("select CR.user_id,CR.time,CR.reply,C.wallpaper,CR.message_type,C.tag_name from conversation_reply CR,conversation C,user_details U where CR.c_id = C.c_id and U.user_id = CR.user_id and ((user_one = $1 or  user_two = $1) and (user_one = $4 or  user_two = $4)) order by time desc limit $2 offset $3", [user.user_id, limit, offset, user.user])
         .then(function (allConversations) {
             // console.log("All conversationss", allConversations);
             DB.query("select online_status from user_details where user_id = $1", user.user_id)
@@ -560,3 +560,60 @@ deleteOldImage = (data, callback) => {
 }
 
 module.exports.createImageId = createImageId;
+
+const addTag = (data, io) => {
+    console.log("Inside addTag", data);
+    updateConversationTag(data, (message) => {
+        console.log("tag updated", message);
+        io.to(data.id).emit('tag-updated', { ...{ "message": message }, ...data });
+    })
+}
+
+updateConversationTag = (data, callback) => {
+    console.log("Inside updateConversationTag");
+    DB.query("update conversation set tag_name = $1 where (user_one = $2 and user_two = $3) or (user_one = $3 and user_two = $2)", [data.tag, data.sender, data.receiver])
+        .then((updated) => {
+            callback("Tag update for user");
+        }).catch((error) => {
+            console.log("Error while updating user tag", error);
+            callback("Oops! Something went wrong!");
+        })
+}
+
+module.exports.addTag = addTag;
+
+var getChats_v2 = function (data, io) {
+    console.log("Inside getChats_v2", data);
+    var finalData = {};
+    qr_str = " and is_archieved = false";
+    if (data.type == "muted")
+        qr_str = " and is_muted = true";
+    else if (data.type == "tagged")
+        qr_str = " and tag_name != '' and tag_name is not null";
+    else if (data.type == "archieved")
+        qr_str = " and is_archieved = true";
+    else
+        console.log("Wrong type");
+    DB.query("SELECT distinct on (phone) phone,initcap(U.user_name) as user_name,U.user_pic,U.user_id,U.online_status,C.c_id,R.reply,now()::date - to_timestamp(R.time)::date as direct,to_timestamp(R.time)::date as time,R.message_type,C.tag_name,C.is_muted,C.is_archieved\
+            FROM user_details U,conversation C, conversation_reply R\
+            WHERE \
+            CASE\
+            WHEN C.user_one = $1\
+            THEN C.user_two = U.user_id\
+            WHEN C.user_two = $1\
+            THEN C.user_one= U.user_id\
+            END\
+            AND\
+            C.c_id=R.c_id\
+            AND\
+            (C.user_one =$1 OR C.user_two =$1) and reply != 'NA' "+ qr_str + " ORDER BY phone,R.time DESC", data.user_id)
+        .then(function (userChats) {
+            finalData.chats = userChats;
+            io.to(data.id).emit('chats', finalData);
+        }).catch(function (error) {
+            console.log("Error while getting user chats", error);
+            io.to(data.id).emit('chats', finalData);
+        })
+}
+
+module.exports.getChats_v2 = getChats_v2;

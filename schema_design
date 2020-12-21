@@ -87,3 +87,8 @@ image_id text references current_drawings(image_id)
 ,color text not null
 ,seq bigint not null default nextval('coSeq')
 );
+
+alter table user_details add column online_status character varying(50) DEFAULT 'Offline';
+alter table conversation add column tag_name varchar(25);
+alter table conversation add column is_muted boolean default false;
+alter table conversation add column is_archieved boolean default false;

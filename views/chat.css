@@ -446,7 +446,7 @@ sidebar .list-wrap .list .count {
 
 .message-footer i {
     position: relative;
-    left: -50px;
+    left: -80px;
     top: 10px;
     font-size: 1.3rem;
     cursor: pointer;
@@ -1452,7 +1452,7 @@ input:checked+.slider:before {
 .action-btns {
     position: fixed;
     right: 20px;
-    top:10px;
+    top: 10px;
 }
 
 .action-btns button {
@@ -1462,7 +1462,7 @@ input:checked+.slider:before {
     padding: 10px;
 }
 
-.action-btns button:hover{
+.action-btns button:hover {
     background: #999;
     color: white;
 }
@@ -1497,4 +1497,65 @@ code {
     border-radius: 10px;
     border: 1px solid #ccc;
     background-color: #f8f9f9;
+}
+
+.tag {
+    /* background: red; */
+}
+
+.tg_name {
+    transition: all 0.2s ease-in-out;
+}
+
+.tag:hover>.tg_name {
+    /* color: red; */
+    display: inline-block;
+}
+
+.tab-nav {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    border-bottom: 0.3px solid rgb(241, 241, 241);
+    padding-bottom: 10px;
+}
+
+.tab-nav button {
+    text-align: center;
+    color: #000000;
+    /* color: #ffffff; */
+}
+
+.tab-nav button:not(:nth-child(1)) {
+    margin-left: 20px;
+}
+
+.tablink {
+    transition: all 0.1s ease-in-out;
+}
+
+#emojis {
+    position: fixed;
+    bottom: 60px;
+}
+
+.no-js #loader {
+    display: none;
+}
+
+.js #loader {
+    display: block;
+    position: absolute;
+    left: 100px;
+    top: 0;
+}
+
+.se-pre-con {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 99999999;
+    background: url('./loader1.gif') center no-repeat #fff;
 }

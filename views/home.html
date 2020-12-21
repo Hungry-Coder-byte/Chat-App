@@ -1,3 +1,4 @@
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
 <link rel="stylesheet" href="./chat.css">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.js"></script>
@@ -6,234 +7,267 @@
 <script src="./connection.js"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<script language="javascript" src="./lz-string/libs/lz-string.js"></script>
-<div class="notification_wrapper">
-    <div class="call_notification">
-        <audio id="calling_tune" style="display: none;" loop>
-            <source src="caller_tune.mp3" type="audio/mpeg">
-        </audio>
-        <p id="notification_content"></p>
-        <div class="call_notification_btns">
-            <i class="fa fa-phone" aria-hidden="true" style="margin-right: 20px;" id="reject_call"></i>
-            <i class="fa fa-phone" aria-hidden="true" style="margin-right: 20px;" id="accept_call"></i>
-        </div>
-    </div>
-</div>
-<div class="container" ng-app="myApp" ng-controller="myCtrl" ng-init="checkAuth()" onload="getConversationOnLoad()">
-    <sidebar>
-        <span class="logo">
-            <img src="{{user_pic}}" id="user_main" class="user_details" style="display: none;">
-            <!-- <i class='far fa-comment-alt compose_new_message'></i> -->
-            <i class="material-icons compose_new_message">chat</i>
-            <i class="material-icons more_opt" onclick="moreOption()">more_vert
-                <div id="more_vert_opts">
-                    <ul>
-                        <li class="profile_click">Profile</li>
-                        <li>Dark Mode
-                            <label class="switch">
-                                <input type="checkbox" id="dark_switch" onclick="darkModeEnableDisable()">
-                                <span class="slider round"></span>
-                            </label>
-                        </li>
-                        <!-- <li>Settings</li> -->
-                        <li onclick="logout()">Logout</li>
-                    </ul>
-                </div>
-            </i>
-        </span>
-        <div class="row composeBox1">
-            <div class="col-sm-12 composeBox-inner1">
-                <div class="form-group has-feedback">
-                    <input id="composeText1" type="text" class="form-control" name="searchText"
-                        placeholder="Search Chat" ng-model="chat_search" ng-change="searchChat()">
-                    <span class="material-icons search_btn_new_chat">
-                        search
-                    </span>
-                    <!-- <span class="glyphicon glyphicon-search form-control-feedback"></span> -->
-                </div>
+<div class="se-pre-con"></div>
+<body>
+    <div class="notification_wrapper">
+        <div class="call_notification">
+            <audio id="calling_tune" style="display: none;" loop>
+                <source src="caller_tune.mp3" type="audio/mpeg">
+            </audio>
+            <p id="notification_content"></p>
+            <div class="call_notification_btns">
+                <i class="fa fa-phone" aria-hidden="true" style="margin-right: 20px;" id="reject_call"></i>
+                <i class="fa fa-phone" aria-hidden="true" style="margin-right: 20px;" id="accept_call"></i>
             </div>
         </div>
-        <div class="list-wrap">
-            <div ng-if="no_chat_found != null && no_chat_found != undefined"
-                style="text-align: center;margin-top:100px;opacity: 0.4;">{{no_chat_found}}</div>
+    </div>
+    <div class="container" ng-app="myApp" ng-controller="myCtrl" ng-init="checkAuth()" onload="getConversationOnLoad()">
+        <sidebar>
+            <span class="logo">
+                <img src="{{user_pic}}" id="user_main" class="user_details" style="display: none;">
+                <!-- <i class='far fa-comment-alt compose_new_message'></i> -->
+                <i class="material-icons compose_new_message">chat</i>
+                <i class="material-icons more_opt" onclick="moreOption()">more_vert
+                    <div id="more_vert_opts">
+                        <ul>
+                            <li class="profile_click">Profile</li>
+                            <li>Dark Mode
+                                <label class="switch">
+                                    <input type="checkbox" id="dark_switch" onclick="darkModeEnableDisable()">
+                                    <span class="slider round"></span>
+                                </label>
+                            </li>
+                            <!-- <li>Settings</li> -->
+                            <li onclick="logout()">Logout</li>
+                        </ul>
+                    </div>
+                </i>
+            </span>
+            <div class="row composeBox1">
+                <div class="col-sm-12 composeBox-inner1">
+                    <div class="form-group has-feedback">
+                        <input id="composeText1" type="text" class="form-control" name="searchText"
+                            placeholder="Search Chat" ng-model="chat_search" ng-change="searchChat()">
+                        <span class="material-icons search_btn_new_chat">
+                            search
+                        </span>
+                        <!-- <span class="glyphicon glyphicon-search form-control-feedback"></span> -->
+                    </div>
+                </div>
+            </div>
+            <div class="">
+                <div class="w3-bar tab-nav">
+                    <!-- <button class="w3-bar-item w3-button tablink w3-grey" onclick="changeTab(event,'Chats')">Chats</button>
+                <button class="w3-bar-item w3-button tablink" onclick="changeTab(event,'Muted')">Muted</button>
+                <button class="w3-bar-item w3-button tablink" onclick="changeTab(event,'Tags')">Tagged</button>
+                <button class="w3-bar-item w3-button tablink" onclick="changeTab(event,'Archieved')">Archieved</button> -->
+                    <button class="w3-bar-item w3-button tablink w3-grey"
+                        onclick="changeTab(event,'Chats')">All</button>
+                    <button class="w3-bar-item w3-button tablink" onclick="changeTab(event,'Muted')">Muted</button>
+                    <button class="w3-bar-item w3-button tablink" onclick="changeTab(event,'Tags')">Tagged</button>
+                    <button class="w3-bar-item w3-button tablink"
+                        onclick="changeTab(event,'Archieved')">Archieved</button>
+                </div>
+            </div>
+            <div class="list-wrap">
+                <div ng-if="no_chat_found != null && no_chat_found != undefined"
+                    style="text-align: center;margin-top:100px;opacity: 0.4;" id="no_chat_found">{{no_chat_found}}</div>
+            </div>
             <div id="chat_opts">
                 <ul>
-                    <li>Mute</li>
-                    <li>Archieve</li>
+                    <li onclick="muteChat()">Mute</li>
+                    <li onclick="archieve()">Archieve</li>
+                    <li onclick="addTag()">Tag</li>
                     <li onclick="deleteChat()">Delete</li>
                 </ul>
             </div>
-        </div>
-    </sidebar>
-    <sidebar class="user_details_side_bar">
-        <h1>User Details</h1>
-    </sidebar>
-    <sidebar class="new_chat">
-        <!-- <h1>New Chat</h1> -->
-        <!-- Heading -->
-        <div class="row newMessage-heading">
-            <div class="row newMessage-main">
-                <div class="col-sm-2 col-xs-2 newMessage-back">
-                    <i class="fa fa-arrow-left newMessage-back-arrow" aria-hidden="true" style="float: left;"></i>
-                    <div class="col-sm-10 col-xs-10 newMessage-title">
-                        New Chat
+            <div id="add-tag" class="w3-modal">
+                <div class="w3-modal-content">
+                    <div class="w3-container" style="height: 200px;padding: 20px;">
+                        <span onclick="document.getElementById('add-tag').style.display='none'"
+                            class="w3-button w3-display-topright">&times;</span>
+                        <form class="w3-container">
+                            <label>Tag Name</label>
+                            <input class="w3-input" type="text" id="tag_name"><br>
+                            <button class="w3-btn w3-blue" onclick="saveTag()">Save</button>
+                        </form>
                     </div>
                 </div>
             </div>
-        </div>
-        <!-- Heading End -->
+        </sidebar>
+        <sidebar class="user_details_side_bar">
+            <h1>User Details</h1>
+        </sidebar>
+        <sidebar class="new_chat">
+            <!-- <h1>New Chat</h1> -->
+            <!-- Heading -->
+            <div class="row newMessage-heading">
+                <div class="row newMessage-main">
+                    <div class="col-sm-2 col-xs-2 newMessage-back">
+                        <i class="fa fa-arrow-left newMessage-back-arrow" aria-hidden="true" style="float: left;"></i>
+                        <div class="col-sm-10 col-xs-10 newMessage-title">
+                            New Chat
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Heading End -->
 
-        <!-- ComposeBox -->
-        <div class="row composeBox">
-            <div class="col-sm-12 composeBox-inner">
-                <div class="form-group has-feedback">
-                    <input id="composeText" type="text" class="form-control" name="searchText"
-                        placeholder="Search People in">
-                    <span class="material-icons search_btn_new_chat">
-                        search
-                    </span>
-                    <!-- <span class="glyphicon glyphicon-search form-control-feedback"></span> -->
-                </div>
-            </div>
-        </div>
-        <!--modals-->
-        <div id="openModal-about" class="modalDialog">
-            <div id="fullmodal">
-                <a href="#" title="Close" class="close">X</a>
-                <div class="modern-form">
-                    <h3>Contact Details</h3>
-                    <fieldset class='float-label-field'>
-                        <label for="contact-name">Name</label>
-                        <input type='text' id="contact-name">
-                    </fieldset>
-                    <fieldset class='float-label-field'>
-                        <label for="contact">Phone number</label>
-                        <input type="tel" name="phone" id="contact" maxlength="10">
-                    </fieldset>
-                    <button type="button" class="btn btn-success" onclick="createNewContact()">Save</button>
-                </div>
-            </div>
-        </div>
-        <div class="whatsapp_contacts">
-            <div class="contacts-inner">
-                <a href="#openModal-about" style="text-decoration: none;color: black;">
-                    <div class="add-new-contact">
-                        <span class="material-icons">
-                            person_add
+            <!-- ComposeBox -->
+            <div class="row composeBox">
+                <div class="col-sm-12 composeBox-inner">
+                    <div class="form-group has-feedback">
+                        <input id="composeText" type="text" class="form-control" name="searchText"
+                            placeholder="Search People in">
+                        <span class="material-icons search_btn_new_chat">
+                            search
                         </span>
-                        <span style="margin-top: 5px;margin-left:15px;position: absolute;">Add Contact</span>
-                    </div>
-                </a>
-                <ul class="contact-list">
-                </ul>
-            </div>
-        </div>
-        <!-- ComposeBox End -->
-    </sidebar>
-    <sidebar class="user_profile">
-        <!-- Heading -->
-        <div class="row newMessage-heading">
-            <div class="row newMessage-main">
-                <div class="col-sm-2 col-xs-2 newMessage-back">
-                    <i class="fa fa-arrow-left newMessage-back-arrow" aria-hidden="true" style="float: left;"></i>
-                    <div class="col-sm-10 col-xs-10 newMessage-title">
-                        Profile
+                        <!-- <span class="glyphicon glyphicon-search form-control-feedback"></span> -->
                     </div>
                 </div>
             </div>
-        </div>
-        <div id="user_profile_pic">
-            <img src="" class="user_pic_large cropcircle">
-            <div class="overlay">
-                <div class="change_pic_txt">Change Photo</div>
+            <!--modals-->
+            <div id="openModal-about" class="modalDialog">
+                <div id="fullmodal">
+                    <a href="#" title="Close" class="close">X</a>
+                    <div class="modern-form">
+                        <h3>Contact Details</h3>
+                        <fieldset class='float-label-field'>
+                            <label for="contact-name">Name</label>
+                            <input type='text' id="contact-name">
+                        </fieldset>
+                        <fieldset class='float-label-field'>
+                            <label for="contact">Phone number</label>
+                            <input type="tel" name="phone" id="contact" maxlength="10">
+                        </fieldset>
+                        <button type="button" class="btn btn-success" onclick="createNewContact()">Save</button>
+                    </div>
+                </div>
             </div>
-            <input id='uploadfile' type='file' style="display: none;">
-        </div>
-        <!-- Heading End -->
-    </sidebar>
-    <!-- <div class="default_page">
+            <div class="whatsapp_contacts">
+                <div class="contacts-inner">
+                    <a href="#openModal-about" style="text-decoration: none;color: black;">
+                        <div class="add-new-contact">
+                            <span class="material-icons">
+                                person_add
+                            </span>
+                            <span style="margin-top: 5px;margin-left:15px;position: absolute;">Add Contact</span>
+                        </div>
+                    </a>
+                    <ul class="contact-list">
+                    </ul>
+                </div>
+            </div>
+            <!-- ComposeBox End -->
+        </sidebar>
+        <sidebar class="user_profile">
+            <!-- Heading -->
+            <div class="row newMessage-heading">
+                <div class="row newMessage-main">
+                    <div class="col-sm-2 col-xs-2 newMessage-back">
+                        <i class="fa fa-arrow-left newMessage-back-arrow" aria-hidden="true" style="float: left;"></i>
+                        <div class="col-sm-10 col-xs-10 newMessage-title">
+                            Profile
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="user_profile_pic">
+                <img src="" class="user_pic_large cropcircle">
+                <div class="overlay">
+                    <div class="change_pic_txt">Change Photo</div>
+                </div>
+                <input id='uploadfile' type='file' style="display: none;">
+            </div>
+            <!-- Heading End -->
+        </sidebar>
+        <!-- <div class="default_page">
         <img src="opening_wallpaper.gif">
     </div> -->
-    <div class="content">
-        <header style="display: none;">
-            <img src="" alt="">
-            <div class="info">
-                <span class="user"></span>
-                <span class="time"></span>
+        <div class="content">
+            <header style="display: none;">
+                <img src="" alt="">
+                <div class="info">
+                    <span class="user"></span>
+                    <span class="time"></span>
+                </div>
+                <p id="typing_status"></p>
+                <div class="communication_channel">
+                    <i class="fa fa-phone" aria-hidden="true" style="margin-right: 20px;display: none"></i>
+                    <i class="fa fa-video-camera" aria-hidden="true" onclick="videoCall_v2()"></i>
+                    <i class="material-icons">more_vert</i>
+                </div>
+                <div class="open">
+                    <a href="javascript:;">UP</a>
+                </div>
+            </header>
+            <div class="message-wrap" style="display: none;">
             </div>
-            <p id="typing_status"></p>
-            <div class="communication_channel">
-                <i class="fa fa-phone" aria-hidden="true" style="margin-right: 20px;display: none"></i>
-                <i class="fa fa-video-camera" aria-hidden="true" onclick="videoCall_v2()"></i>
-                <i class="material-icons">more_vert</i>
+            <div id="emojis">
             </div>
-            <div class="open">
-                <a href="javascript:;">UP</a>
+            <div class="message-footer" style="display: none;">
+                <input type="text" data-placeholder="Send a message to {0}" id="message_to_send" />
+                <i class="fa fa-smile-o" aria-hidden="true"></i>
+                <i class="fa fa-paperclip floatingButton" aria-hidden="true"></i>
+                <i class="fa fa-paper-plane" aria-hidden="true" onclick="sendMessage()" id="send_message"></i>
+                <input id='fileToSend' type='file' style="display: none;">
             </div>
-        </header>
-        <div class="message-wrap" style="display: none;">
-        </div>
-        <div class="message-footer" style="display: none;">
-            <input type="text" data-placeholder="Send a message to {0}" id="message_to_send" />
-            <i class="fa fa-paperclip floatingButton" aria-hidden="true"></i>
-            <i class="fa fa-paper-plane" aria-hidden="true" onclick="sendMessage()" id="send_message"></i>
-            <input id='fileToSend' type='file' style="display: none;">
-        </div>
-        <div class="floatingButtonWrap">
-            <div class="floatingButtonInner">
-                <ul class="floatingMenu">
-                    <li>
-                        <a href="" id="attach_file">Photo</a>
-                    </li>
-                    <li>
-                        <a href="" id="drawing">Drawing</a>
-                    </li>
-                </ul>
+            <div class="floatingButtonWrap">
+                <div class="floatingButtonInner">
+                    <ul class="floatingMenu">
+                        <li>
+                            <a href="" id="attach_file">Photo</a>
+                        </li>
+                        <li>
+                            <a href="" id="drawing">Drawing</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-        <div class="drawingScreen">
-            <canvas class="whiteboard"></canvas>
-            <div class="colors">
-                <div class="color black"></div>
-                <div class="color red"></div>
-                <div class="color green"></div>
-                <div class="color blue"></div>
-                <div class="color yellow"></div>
-                <!-- <span class="color-picker">
+            <div class="drawingScreen">
+                <canvas class="whiteboard"></canvas>
+                <div class="colors">
+                    <div class="color black"></div>
+                    <div class="color red"></div>
+                    <div class="color green"></div>
+                    <div class="color blue"></div>
+                    <div class="color yellow"></div>
+                    <!-- <span class="color-picker">
                     <label for="colorPicker">
                         <input type="color" value="#1DB8CE" id="colorPicker">
                     </label>
                 </span> -->
-            </div>
-            <div class="action-btns">
-                <button onclick="undoDraw()">Clear</button>
-                <button onclick="sendDrawingImage()">Submit</button>
-            </div>
-        </div>
-    </div>
-    <div id="id01" class="w3-modal">
-        <div class="w3-modal-content w3-animate-zoom w3-card-4">
-            <div class="w3-container" style="height: 200px;">
-                <div class="lds-facebook">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                </div><br>
-                <p style="text-align: center;">Kindly Refresh The Page When Video Call Ends</p>
-                <div class="lds-facebook" style="float: right;">
-                    <div></div>
-                    <div></div>
-                    <div></div>
+                </div>
+                <div class="action-btns">
+                    <button onclick="undoDraw()">Clear</button>
+                    <button onclick="sendDrawingImage()">Submit</button>
                 </div>
             </div>
         </div>
+        <div id="id01" class="w3-modal">
+            <div class="w3-modal-content w3-animate-zoom w3-card-4">
+                <div class="w3-container" style="height: 200px;">
+                    <div class="lds-facebook">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div><br>
+                    <p style="text-align: center;">Kindly Refresh The Page When Video Call Ends</p>
+                    <div class="lds-facebook" style="float: right;">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class='center'>
+            <iframe src="" id="videoCallScreen" allow="camera;microphone"
+                style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;"></iframe>
+        </div>
+        <div id="snackbar"></div>
     </div>
-    <div class='center'>
-        <iframe src="" id="videoCallScreen" allow="camera;microphone"
-            style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;"></iframe>
-    </div>
-    <div id="snackbar"></div>
-</div>
+</body>
 <script src="./chat.js"></script>
 <script src="/socket.js"></script>
 <script type="text/javascript" src="/index.js"></script>
@@ -251,4 +285,33 @@
             targetLabel.appendChild(codeArea);
         });
     });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/12.0.4/2/twemoji.min.js"
+    integrity="sha512-panBjUGuKarjg0qxHggQULmRf9jB/YVCy238hmzBWUuLeOuwMSuJgJcUv3T+rwXUBZ9zeUvc49ZcCRH+EO0H8g=="
+    crossorigin="anonymous"></script>
+<link rel="stylesheet" href="./emoji-picker-twemoji/css/emojis.css" />
+<script src="./emoji-picker-twemoji/js/DisMojiPicker.js"></script>
+<script>
+    // $(window).load(function () {
+    //     // Animate loader off screen
+    //     $(".se-pre-con").fadeOut("slow");;
+    // });
+    document.onreadystatechange = function () {
+        if (document.readyState !== "complete") {
+            // $(".se-pre-con").fadeOut("slow");;
+            document.querySelector("body").style.visibility = "hidden";
+            document.querySelector(".se-pre-con").style.visibility = "visible";
+        } else {
+            document.querySelector(".se-pre-con").style.display = "none";
+            document.querySelector("body").style.visibility = "visible";
+        }
+    };
+    $("#emojis").disMojiPicker();
+    twemoji.parse(document.body);
+    $("#emojis").picker(
+        emoji => {
+            console.log("emoji selected", emoji)
+            $("#message_to_send").val($("#message_to_send").val() + emoji);
+        }
+    );
 </script>

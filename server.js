@@ -112,6 +112,13 @@ io.on('connection', (socket) => {
         route.sendCoordinatesToUser(data, io);
         // socket.broadcast.emit('drawing', data);
     });
+    socket.on('add-tag', (data) => {
+        // console.log(data);
+        route.addTag(data, io);
+    });
+    socket.on('get-chats', (data) => {
+        route.getChats_v2(data, io);
+    });
     socket.on('disconnect', () => {
         console.log("User disconnected", socket.id);
         route.setOnlineStatus(socket.id, "Offline", io);
